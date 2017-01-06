@@ -9,7 +9,7 @@
 namespace Tallanto\Api\Entity;
 
 
-class ClassEntity extends Base {
+class ClassEntity extends BaseEntity {
   /**
    * @var string
    */
@@ -74,6 +74,20 @@ class ClassEntity extends Base {
    * @var string
    */
   protected $employee_id;
+
+  /**
+   * @var array
+   */
+  protected $visits = [];
+
+  /**
+   * ClassEntity constructor.
+   *
+   * @param $data
+   */
+  public function __construct($data) {
+    parent::__construct(__CLASS__, $data);
+  }
 
   /**
    * @return string
@@ -164,6 +178,13 @@ class ClassEntity extends Base {
    */
   public function getEmployeeId() {
     return $this->employee_id;
+  }
+
+  /**
+   * @return array
+   */
+  public function getVisits() {
+    return $this->visits;
   }
 
 }

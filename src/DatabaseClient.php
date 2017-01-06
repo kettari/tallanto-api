@@ -8,11 +8,12 @@
 
 namespace Tallanto\Api;
 
+
 use Doctrine\DBAL\Configuration;
 use Doctrine\DBAL\DriverManager;
 use Monolog\Logger;
 
-class Client {
+class DatabaseClient {
 
   /**
    * @var \Monolog\Logger
@@ -25,7 +26,7 @@ class Client {
   protected $connection;
 
   /**
-   * Client constructor.
+   * DatabaseClient constructor.
    *
    * @param \Monolog\Logger $logger
    * @param string $database_name
@@ -37,12 +38,30 @@ class Client {
   public function __construct(Logger $logger, $database_name, $user, $password, $host = 'localhost', $port = 3306) {
     $this->logger = $logger;
 
+    // DBAL configuration
     $config = new Configuration();
-    // the connection configuration
+    $config->setSQLLogger(new TallantoSqlLogger($logger));
+
+    // The connection configuration
     $connection_params = [
       'url' => sprintf('mysql://%s:%s@%s:%d/%s', $user, $password, $host, $port, $database_name),
     ];
     $this->connection = DriverManager::getConnection($connection_params, $config);
+
+    // Write log
+    $log_database_params = [
+      'database_name' => $database_name,
+      'user'          => $user,
+      'password'      => 'HIDDEN',
+      'host'          => $host,
+      'port'          => $port,
+    ];
+    if ($this->connection->isConnected()) {
+      $this->logger->debug('Connection to database "{database_name}" opened', $log_database_params);
+    }
+    else {
+      $this->logger->error('Connection to database "{database_name}" is NOT opened', $log_database_params);
+    }
   }
 
   /**
