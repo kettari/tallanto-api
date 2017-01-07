@@ -89,4 +89,12 @@ abstract class Iterator implements IteratorInterface {
     return $this;
   }
 
+  /**
+   * @return int
+   */
+  public function count() {
+    return count($this->items);
+  }
+
+
 }

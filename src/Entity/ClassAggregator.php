@@ -18,12 +18,4 @@ class ClassAggregator extends Aggregator {
     return new ClassIterator($this->items);
   }
 
-  /**
-   * @param \Tallanto\Api\Entity\ClassEntity $entity
-   * @return mixed|void
-   */
-  public function add($entity) {
-    $this->items[] = $entity;
-  }
-
 }

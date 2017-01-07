@@ -32,15 +32,6 @@ class Visit extends BaseEntity {
   protected $status;
 
   /**
-   * Visit constructor.
-   *
-   * @param $data
-   */
-  public function __construct($data) {
-    parent::__construct(__CLASS__, $data);
-  }
-
-  /**
    * @return \Tallanto\Api\Entity\ClassEntity
    */
   public function getClass() {

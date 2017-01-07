@@ -16,6 +16,16 @@ abstract class Aggregator implements AggregateInterface {
   /**
    * @var array
    */
-  protected $items;
+  protected $items = [];
+
+  /**
+   * @param mixed $entity
+   * @return Aggregator
+   */
+  public function add($entity) {
+    $this->items[] = $entity;
+
+    return $this;
+  }
 
 }

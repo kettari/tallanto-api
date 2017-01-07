@@ -14,12 +14,11 @@ class BaseEntity {
   /**
    * BaseEntity constructor.
    *
-   * @param string $class Class name to check for "magic" properties
    * @param $data
    */
-  public function __construct($class, $data) {
+  public function __construct($data) {
     foreach ($data as $key => $val) {
-      if (property_exists(__CLASS__, $key)) {
+      if (property_exists($this, $key)) {
         $this->$key = $val;
       }
     }

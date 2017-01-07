@@ -61,7 +61,7 @@ class TallantoSqlLogger extends DebugStack {
     $this->logger->debug(
       'SQL execution finished, elapsed time {execution_time} seconds',
       [
-        'execution_time'    => sprintf('%.1f', $execution_time),
+        'execution_time' => sprintf('%.2f', $execution_time),
       ]
     );
   }

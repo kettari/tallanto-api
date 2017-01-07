@@ -44,7 +44,7 @@ class DatabaseClient {
 
     // The connection configuration
     $connection_params = [
-      'url' => sprintf('mysql://%s:%s@%s:%d/%s', $user, $password, $host, $port, $database_name),
+      'url' => sprintf('mysql://%s:%s@%s:%d/%s?charset=utf8', $user, $password, $host, $port, $database_name),
     ];
     $this->connection = DriverManager::getConnection($connection_params, $config);
 
@@ -56,11 +56,13 @@ class DatabaseClient {
       'host'          => $host,
       'port'          => $port,
     ];
-    if ($this->connection->isConnected()) {
-      $this->logger->debug('Connection to database "{database_name}" opened', $log_database_params);
+    if ($this->connection->isConnected() || $this->connection->connect()) {
+      $this->logger->debug('Connection to database "{database_name}" opened',
+        array_merge($log_database_params, ['source' => __CLASS__ . '->' . __FUNCTION__]));
     }
     else {
-      $this->logger->error('Connection to database "{database_name}" is NOT opened', $log_database_params);
+      $this->logger->error('Connection to database "{database_name}" is NOT opened',
+        array_merge($log_database_params, ['source' => __CLASS__ . '->' . __FUNCTION__]));
     }
   }
 

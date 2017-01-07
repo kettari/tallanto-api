@@ -35,4 +35,9 @@ interface IteratorInterface {
    */
   public function remove();
 
+  /**
+   * @return integer
+   */
+  public function count();
+
 }

@@ -21,12 +21,12 @@ class ClassEntity extends BaseEntity {
   protected $name;
 
   /**
-   * @var string
+   * @var integer
    */
   protected $date_start;
 
   /**
-   * @var string
+   * @var integer
    */
   protected $date_finish;
 
@@ -61,33 +61,19 @@ class ClassEntity extends BaseEntity {
   protected $audience_translated;
 
   /**
-   * @var string
+   * @var integer
    */
-  protected $employee_first_name;
+  protected $profit;
 
   /**
-   * @var string
+   * @var array
    */
-  protected $employee_last_name;
-
-  /**
-   * @var string
-   */
-  protected $employee_id;
+  protected $teachers = [];
 
   /**
    * @var array
    */
   protected $visits = [];
-
-  /**
-   * ClassEntity constructor.
-   *
-   * @param $data
-   */
-  public function __construct($data) {
-    parent::__construct(__CLASS__, $data);
-  }
 
   /**
    * @return string
@@ -104,14 +90,14 @@ class ClassEntity extends BaseEntity {
   }
 
   /**
-   * @return string
+   * @return integer
    */
   public function getDateStart() {
     return $this->date_start;
   }
 
   /**
-   * @return string
+   * @return integer
    */
   public function getDateFinish() {
     return $this->date_finish;
@@ -160,24 +146,17 @@ class ClassEntity extends BaseEntity {
   }
 
   /**
-   * @return string
+   * @return int
    */
-  public function getEmployeeFirstName() {
-    return $this->employee_first_name;
+  public function getProfit() {
+    return $this->profit;
   }
 
   /**
-   * @return string
+   * @return array
    */
-  public function getEmployeeLastName() {
-    return $this->employee_last_name;
-  }
-
-  /**
-   * @return string
-   */
-  public function getEmployeeId() {
-    return $this->employee_id;
+  public function getTeachers() {
+    return $this->teachers;
   }
 
   /**
@@ -185,6 +164,16 @@ class ClassEntity extends BaseEntity {
    */
   public function getVisits() {
     return $this->visits;
+  }
+
+  /**
+   * @param array $visits
+   * @return ClassEntity
+   */
+  public function setVisits(array $visits) {
+    $this->visits = $visits;
+
+    return $this;
   }
 
 }
