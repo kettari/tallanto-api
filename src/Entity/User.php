@@ -9,42 +9,27 @@
 namespace Tallanto\Api\Entity;
 
 
-class User extends BaseEntity {
+class User extends Person {
 
   /**
    * @var string
    */
-  protected $id;
-
-  /**
-   * @var string
-   */
-  protected $first_name;
-
-  /**
-   * @var string
-   */
-  protected $last_name;
+  protected $user_name;
 
   /**
    * @return string
    */
-  public function getId() {
-    return $this->id;
+  public function getUserName() {
+    return $this->user_name;
   }
 
   /**
-   * @return string
+   * @param string $user_name
+   * @return User
    */
-  public function getFirstName() {
-    return $this->first_name;
-  }
-
-  /**
-   * @return string
-   */
-  public function getLastName() {
-    return $this->last_name;
+  public function setUserName($user_name) {
+    $this->user_name = $user_name;
+    return $this;
   }
 
 }

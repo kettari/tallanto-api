@@ -9,46 +9,7 @@
 namespace Tallanto\Api\Entity;
 
 
-class Contact extends BaseEntity {
-  /**
-   * @var string
-   */
-  protected $id;
-
-  /**
-   * @var string
-   */
-  protected $first_name;
-
-  /**
-   * @var string
-   */
-  protected $last_name;
-
-  /**
-   * @var string
-   */
-  protected $phone_home;
-
-  /**
-   * @var string
-   */
-  protected $phone_mobile;
-
-  /**
-   * @var string
-   */
-  protected $phone_work;
-
-  /**
-   * @var string
-   */
-  protected $phone_other;
-
-  /**
-   * @var string
-   */
-  protected $phone_fax;
+class Contact extends Person {
 
   /**
    * @var string
@@ -56,80 +17,19 @@ class Contact extends BaseEntity {
   protected $type_client_c;
 
   /**
-   * @var array
-   */
-  protected $email_addresses;
-
-  /**
-   * @var string
-   */
-  protected $manager_first_name;
-
-  /**
-   * @var string
-   */
-  protected $manager_last_name;
-
-  /**
    * @var string
    */
   protected $type_client_translated;
 
   /**
-   * @return string
+   * @var string
    */
-  public function getId() {
-    return $this->id;
-  }
+  protected $manager_id;
 
   /**
-   * @return string
+   * @var User
    */
-  public function getFirstName() {
-    return $this->first_name;
-  }
-
-  /**
-   * @return string
-   */
-  public function getLastName() {
-    return $this->last_name;
-  }
-
-  /**
-   * @return string
-   */
-  public function getPhoneHome() {
-    return $this->phone_home;
-  }
-
-  /**
-   * @return string
-   */
-  public function getPhoneMobile() {
-    return $this->phone_mobile;
-  }
-
-  /**
-   * @return string
-   */
-  public function getPhoneWork() {
-    return $this->phone_work;
-  }
-
-  /**
-   * @return string
-   */
-  public function getPhoneOther() {
-    return $this->phone_other;
-  }
-
-  /**
-   * @return string
-   */
-  public function getPhoneFax() {
-    return $this->phone_fax;
-  }
+  protected $manager;
 
   /**
    * @return string
@@ -139,24 +39,12 @@ class Contact extends BaseEntity {
   }
 
   /**
-   * @return array
+   * @param string $type_client_c
+   * @return Contact
    */
-  public function getEmailAddresses() {
-    return $this->email_addresses;
-  }
-
-  /**
-   * @return string
-   */
-  public function getManagerFirstName() {
-    return $this->manager_first_name;
-  }
-
-  /**
-   * @return string
-   */
-  public function getManagerLastName() {
-    return $this->manager_last_name;
+  public function setTypeClientC($type_client_c) {
+    $this->type_client_c = $type_client_c;
+    return $this;
   }
 
   /**
@@ -164,6 +52,47 @@ class Contact extends BaseEntity {
    */
   public function getTypeClientTranslated() {
     return $this->type_client_translated;
+  }
+
+  /**
+   * @param string $type_client_translated
+   * @return Contact
+   */
+  public function setTypeClientTranslated($type_client_translated) {
+    $this->type_client_translated = $type_client_translated;
+    return $this;
+  }
+
+  /**
+   * @return string
+   */
+  public function getManagerId() {
+    return $this->manager_id;
+  }
+
+  /**
+   * @param string $manager_id
+   * @return Contact
+   */
+  public function setManagerId($manager_id) {
+    $this->manager_id = $manager_id;
+    return $this;
+  }
+
+  /**
+   * @return \Tallanto\Api\Entity\User
+   */
+  public function getManager() {
+    return $this->manager;
+  }
+
+  /**
+   * @param \Tallanto\Api\Entity\User $manager
+   * @return Contact
+   */
+  public function setManager($manager) {
+    $this->manager = $manager;
+    return $this;
   }
 
 }
