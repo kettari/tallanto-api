@@ -14,12 +14,7 @@ class Contact extends Person {
   /**
    * @var string
    */
-  protected $type_client_c;
-
-  /**
-   * @var string
-   */
-  protected $type_client_translated;
+  protected $type;
 
   /**
    * @var string
@@ -34,32 +29,16 @@ class Contact extends Person {
   /**
    * @return string
    */
-  public function getTypeClientC() {
-    return $this->type_client_c;
+  public function getType() {
+    return $this->type;
   }
 
   /**
-   * @param string $type_client_c
+   * @param string $type
    * @return Contact
    */
-  public function setTypeClientC($type_client_c) {
-    $this->type_client_c = $type_client_c;
-    return $this;
-  }
-
-  /**
-   * @return string
-   */
-  public function getTypeClientTranslated() {
-    return $this->type_client_translated;
-  }
-
-  /**
-   * @param string $type_client_translated
-   * @return Contact
-   */
-  public function setTypeClientTranslated($type_client_translated) {
-    $this->type_client_translated = $type_client_translated;
+  public function setType($type) {
+    $this->type = $type;
     return $this;
   }
 

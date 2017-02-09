@@ -55,6 +55,13 @@ abstract class DatabaseAggregator extends AbstractAggregator {
   abstract function fetch();
 
   /**
+   * Returns total number of records that fulfil the criteria.
+   *
+   * @return integer
+   */
+  abstract function totalCount();
+
+  /**
    * @return mixed
    */
   public function getOffset() {

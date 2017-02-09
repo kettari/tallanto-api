@@ -9,7 +9,17 @@
 namespace Tallanto\Api\Entity;
 
 
-class BaseEntity {
+abstract class BaseEntity {
+
+  /**
+   * @var string
+   */
+  protected $date_created;
+
+  /**
+   * @var string
+   */
+  protected $date_updated;
 
   /**
    * BaseEntity constructor.
@@ -22,6 +32,47 @@ class BaseEntity {
         $this->$key = $val;
       }
     }
+  }
+
+  /**
+   * Serializes the object to an array
+   *
+   * @return array
+   */
+  function toArray() {
+    return get_object_vars($this);
+  }
+
+  /**
+   * @return string
+   */
+  public function getDateCreated() {
+    return $this->date_created;
+  }
+
+  /**
+   * @param string $date_created
+   * @return BaseEntity
+   */
+  public function setDateCreated($date_created) {
+    $this->date_created = $date_created;
+    return $this;
+  }
+
+  /**
+   * @return string
+   */
+  public function getDateUpdated() {
+    return $this->date_updated;
+  }
+
+  /**
+   * @param string $date_updated
+   * @return BaseEntity
+   */
+  public function setDateUpdated($date_updated) {
+    $this->date_updated = $date_updated;
+    return $this;
   }
 
 }

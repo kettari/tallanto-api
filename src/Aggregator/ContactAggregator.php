@@ -60,24 +60,11 @@ class ContactAggregator extends DatabaseAggregator {
    * @inheritdoc
    */
   function fetch() {
-    // Format WHERE clause of the SQL statement
-    $where_clause = '';
-    if (!empty($this->id)) {
-      $where_clause .= ' AND c.id = :contact_id';
-    }
-    if (!empty($this->query)) {
-      $where_clause .= ' AND 
-        (
-          c.first_name LIKE :query OR 
-          c.last_name LIKE :query OR
-          c.phone_home LIKE :query OR
-          c.phone_mobile LIKE :query OR
-          c.phone_work LIKE :query OR
-          c.phone_other LIKE :query OR
-          c.phone_fax LIKE :query
-        )';
-    }
-    $sql = $this->getContactsSql($where_clause, $this->offset, $this->limit);
+    $sql = $this->getContactsSql(
+      $this->getSelectClause(),
+      $this->getWhereClause(),
+      $this->getLimitClause($this->offset, $this->limit)
+    );
     $stmt = $this->connection->getConnection()->executeQuery(
       $sql,
       [
@@ -105,6 +92,94 @@ class ContactAggregator extends DatabaseAggregator {
   }
 
   /**
+   * @inheritdoc
+   */
+  function totalCount() {
+    $sql = $this->getContactsSql(
+      'COUNT(DISTINCT c.id)',
+      $this->getWhereClause(),
+      ''
+    );
+    $stmt = $this->connection->getConnection()->executeQuery(
+      $sql,
+      [
+        'contact_id' => $this->id,
+        'query'      => '%' . $this->query . '%',
+      ],
+      [
+        PDO::PARAM_STR,
+        PDO::PARAM_STR,
+      ]
+    );
+
+    // Fetch column
+    $records_count = $stmt->fetchColumn();
+
+    return $records_count;
+  }
+
+
+  /**
+   * Prepare SELECT SQL clause
+   *
+   * @return string
+   */
+  protected function getSelectClause() {
+    return
+      'c.id AS contact_id,
+        c.first_name,
+        c.last_name,
+        c.phone_home,
+        c.phone_mobile,
+        c.phone_work,
+        c.phone_other,
+        c.phone_fax,
+        c.last_contact_date,
+        DATE_FORMAT(c.date_entered, "%Y-%m-%dT%H:%i:%sZ") AS "date_entered",
+        DATE_FORMAT(c.date_modified, "%Y-%m-%dT%H:%i:%sZ") AS "date_modified",
+        c.assigned_user_id AS manager_id,
+        cs.type_client_c';
+  }
+
+  /**
+   * Prepare WHERE SQL clause
+   *
+   * @return string
+   */
+  protected function getWhereClause() {
+    // Format WHERE clause of the SQL statement
+    $where_clause = '';
+    if (!empty($this->id)) {
+      $where_clause .= ' AND c.id = :contact_id';
+    }
+    if (!empty($this->query)) {
+      $where_clause .= ' AND 
+        (
+          c.first_name LIKE :query OR 
+          c.last_name LIKE :query OR
+          c.phone_home LIKE :query OR
+          c.phone_mobile LIKE :query OR
+          c.phone_work LIKE :query OR
+          c.phone_other LIKE :query OR
+          c.phone_fax LIKE :query
+        )';
+    }
+
+    return $where_clause;
+  }
+
+  /**
+   * Get LIMIT SQL clause
+   *
+   * @param integer $items_offset
+   * @param integer $items_limit
+   * @return string
+   */
+  protected function getLimitClause($items_offset, $items_limit) {
+    return sprintf('LIMIT %d, %d', $items_offset, $items_limit);
+  }
+
+  /**
    * Retrieve data from the row and return Contact object
    *
    * @param array $row
@@ -112,18 +187,19 @@ class ContactAggregator extends DatabaseAggregator {
    */
   public static function createContact(array $row) {
     return new Contact([
-      'id'                     => $row['contact_id'],
-      'first_name'             => $row['first_name'],
-      'last_name'              => $row['last_name'],
-      'phone_home'             => $row['phone_home'],
-      'phone_mobile'           => $row['phone_mobile'],
-      'phone_work'             => $row['phone_work'],
-      'phone_other'            => $row['phone_other'],
-      'phone_fax'              => $row['phone_fax'],
-      'type_client_c'          => $row['type_client_c'],
-      'type_client_translated' => $row['type_client_translated'],
-      'email_addresses'        => NULL,
-      'manager_id'             => $row['manager_id'],
+      'id'              => $row['contact_id'],
+      'first_name'      => $row['first_name'],
+      'last_name'       => $row['last_name'],
+      'phone_home'      => $row['phone_home'],
+      'phone_mobile'    => $row['phone_mobile'],
+      'phone_work'      => $row['phone_work'],
+      'phone_other'     => $row['phone_other'],
+      'phone_fax'       => $row['phone_fax'],
+      'type'            => $row['type_client_c'],
+      'email_addresses' => NULL,
+      'manager_id'      => $row['manager_id'],
+      'date_created'    => $row['date_entered'],
+      'date_updated'    => $row['date_modified'],
     ]);
   }
 
@@ -134,40 +210,24 @@ class ContactAggregator extends DatabaseAggregator {
    *
    * @see http://stackoverflow.com/a/20467350/7194257
    *
+   * @param string $select_clause
    * @param string $where_clause
-   * @param integer $items_offset
-   * @param integer $items_limit
+   * @param string $limit_clause
    * @return string
    */
-  protected function getContactsSql($where_clause, $items_offset, $items_limit) {
+  protected function getContactsSql($select_clause, $where_clause, $limit_clause) {
     return sprintf('
       SELECT
-        c.id AS contact_id,
-        c.first_name,
-        c.last_name,
-        c.phone_home,
-        c.phone_mobile,
-        c.phone_work,
-        c.phone_other,
-        c.phone_fax,
-        c.last_contact_date,
-        c.date_entered,
-        
-        cs.type_client_c,
-        
-        tl_type_c.translate AS type_client_translated,
-               
-        u.id AS manager_id
+        %s
     
       FROM contacts c
       
       LEFT JOIN contacts_cstm cs ON cs.id_c = c.id
-      LEFT JOIN translated_lists_for_report tl_type_c ON tl_type_c.list_name = "type_client_list" AND tl_type_c.value = cs.type_client_c
       
       WHERE c.deleted = 0%s
-      ORDER BY c.id
+      ORDER BY c.last_name, c.first_name
       
-      LIMIT %d, %d', $where_clause, $items_offset, $items_limit);
+      %s', $select_clause, $where_clause, $limit_clause);
     /*
      * e.email_addresses,
      * LEFT JOIN email_addr_bean_rel eb ON eb.bean_id = c.id AND eb.bean_module = "Contacts"
