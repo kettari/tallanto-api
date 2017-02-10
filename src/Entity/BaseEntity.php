@@ -14,6 +14,11 @@ abstract class BaseEntity {
   /**
    * @var string
    */
+  protected $id;
+
+  /**
+   * @var string
+   */
   protected $date_created;
 
   /**
@@ -41,6 +46,22 @@ abstract class BaseEntity {
    */
   function toArray() {
     return get_object_vars($this);
+  }
+
+  /**
+   * @return string
+   */
+  public function getId() {
+    return $this->id;
+  }
+
+  /**
+   * @param string $id
+   * @return BaseEntity
+   */
+  public function setId($id) {
+    $this->id = $id;
+    return $this;
   }
 
   /**

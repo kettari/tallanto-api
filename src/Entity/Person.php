@@ -14,11 +14,6 @@ class Person extends BaseEntity {
   /**
    * @var string
    */
-  protected $id;
-
-  /**
-   * @var string
-   */
   protected $first_name;
 
   /**
@@ -55,22 +50,6 @@ class Person extends BaseEntity {
    * @var array
    */
   protected $emails;
-
-  /**
-   * @return string
-   */
-  public function getId() {
-    return $this->id;
-  }
-
-  /**
-   * @param string $id
-   * @return Person
-   */
-  public function setId($id) {
-    $this->id = $id;
-    return $this;
-  }
 
   /**
    * @return string

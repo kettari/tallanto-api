@@ -9,9 +9,9 @@
 namespace Tallanto\Api\Aggregator;
 
 
-use Tallanto\Api\Entity\Contact;
+use Tallanto\Api\Entity\Ticket;
 
-class ContactAggregator extends EntityAggregator {
+class TicketAggregator extends EntityAggregator {
 
   /**
    * Parse array received from the provider and create objects.
@@ -23,12 +23,12 @@ class ContactAggregator extends EntityAggregator {
     $this->clear();
     // Iterate rows and create Contact objects
     foreach ($result as $row) {
-      $contact = self::buildContact($row);
+      $contact = self::buildTicket($row);
       $this->append($contact);
     }
   }
 
-   /**
+  /**
    * Add (create) entity to the storage. Copy of the object
    * is added to this aggregator's internal storage.
    *
@@ -40,7 +40,7 @@ class ContactAggregator extends EntityAggregator {
     // Unset total records count for safety
     $this->total_count = NULL;
     // TODO: Implement add() method.
-    throw new \Exception('ContactAggregator::add() not implemented');
+    throw new \Exception('TicketAggregator::add() not implemented');
   }
 
   /**
@@ -53,31 +53,17 @@ class ContactAggregator extends EntityAggregator {
     // Unset total records count for safety
     $this->total_count = NULL;
     // TODO: Implement update() method.
-    throw new \Exception('ContactAggregator::update() not implemented');
+    throw new \Exception('TicketAggregator::update() not implemented');
   }
 
   /**
    * Retrieves data from the row and returns Contact object.
    *
    * @param array $row
-   * @return \Tallanto\Api\Entity\Contact
+   * @return \Tallanto\Api\Entity\Ticket
    */
-  public static function buildContact(array $row) {
-    return new Contact([
-      'id'              => $row['id'],
-      'first_name'      => $row['first_name'],
-      'last_name'       => $row['last_name'],
-      'phone_home'      => $row['phone_home'],
-      'phone_mobile'    => $row['phone_mobile'],
-      'phone_work'      => $row['phone_work'],
-      'phone_other'     => $row['phone_other'],
-      'phone_fax'       => $row['phone_fax'],
-      'type'            => $row['type'],
-      'email_addresses' => NULL,
-      'manager_id'      => $row['manager_id'],
-      'date_created'    => $row['date_created'],
-      'date_updated'    => $row['date_updated'],
-    ]);
+  public static function buildTicket(array $row) {
+    return new Ticket($row);
   }
 
 }

@@ -6,57 +6,15 @@
  * Time: 19:38
  */
 
-namespace Tallanto\Api\Provider;
+namespace Tallanto\Api\Provider\Database;
 
 
 use PDO;
-use Tallanto\Api\Provider\Database\DatabaseClient;
 
-class DatabaseProvider extends AbstractProvider implements ProviderInterface {
+class ContactDatabaseProvider extends AbstractDatabaseProvider {
 
-  /**
-   * @var DatabaseClient
-   */
-  protected $connection;
-
-  /**
-   * DatabaseProvider constructor.
-   *
-   * @param \Tallanto\Api\Provider\Database\DatabaseClient $connection
-   */
-  public function __construct(DatabaseClient $connection) {
-    $this->connection = $connection;
-  }
-
-  /**
-   * Fetches (loads) data from the upstream using page number, page size and
-   * possible ID and query values.
-   *
-   * Returns array if everything is OK.
-   *
-   * @return array
-   */
-  function fetch() {
-    $offset = ($this->getPageNumber() - 1) * $this->getPageSize();
-    $sql = $this->getContactsSql(
-      $this->getSelectClause(),
-      $this->getWhereClause(),
-      $this->getLimitClause($offset, $this->getPageSize())
-    );
-    $stmt = $this->connection->getConnection()->executeQuery(
-      $sql,
-      ['query' => '%' . $this->query . '%'],
-      [
-        PDO::PARAM_STR,
-      ]
-    );
-
-    // Fetch all results into associative array
-    return $stmt->fetchAll(PDO::FETCH_ASSOC);
-  }
-
-  /**
-   * Get the SQL for Contacts.
+   /**
+   * Gets main SQL.
    *
    * About prepared statements and LIMIT problem
    *
@@ -67,7 +25,7 @@ class DatabaseProvider extends AbstractProvider implements ProviderInterface {
    * @param string $limit_clause
    * @return string
    */
-  protected function getContactsSql($select_clause, $where_clause, $limit_clause) {
+  protected function getMainSql($select_clause, $where_clause, $limit_clause) {
     return sprintf('
       SELECT
         %s
@@ -90,7 +48,7 @@ class DatabaseProvider extends AbstractProvider implements ProviderInterface {
   }
 
   /**
-   * Prepare SELECT SQL clause
+   * Prepares SELECT SQL clause.
    *
    * @return string
    */
@@ -105,14 +63,14 @@ class DatabaseProvider extends AbstractProvider implements ProviderInterface {
         c.phone_other,
         c.phone_fax,
         c.last_contact_date,
-        DATE_FORMAT(c.date_entered, "%Y-%m-%dT%H:%i:%sZ") AS "date_entered",
-        DATE_FORMAT(c.date_modified, "%Y-%m-%dT%H:%i:%sZ") AS "date_modified",
+        DATE_FORMAT(c.date_entered, "%Y-%m-%dT%H:%i:%sZ") AS "date_created",
+        DATE_FORMAT(c.date_modified, "%Y-%m-%dT%H:%i:%sZ") AS "date_updated",
         c.assigned_user_id AS manager_id,
-        cs.type_client_c';
+        cs.type_client_c AS `type`';
   }
 
   /**
-   * Prepare WHERE SQL clause
+   * Prepares WHERE SQL clause
    *
    * @return string
    */
@@ -137,23 +95,12 @@ class DatabaseProvider extends AbstractProvider implements ProviderInterface {
   }
 
   /**
-   * Get LIMIT SQL clause
-   *
-   * @param integer $items_offset
-   * @param integer $items_limit
-   * @return string
-   */
-  protected function getLimitClause($items_offset, $items_limit) {
-    return sprintf('LIMIT %d, %d', $items_offset, $items_limit);
-  }
-
-  /**
    * Returns total number of records that fulfil the criteria.
    *
    * @return int
    */
   function totalCount() {
-    $sql = $this->getContactsSql(
+    $sql = $this->getMainSql(
       'COUNT(DISTINCT c.id)',
       $this->getWhereClause(),
       ''

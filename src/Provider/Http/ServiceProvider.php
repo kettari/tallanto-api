@@ -6,10 +6,12 @@
  * Time: 20:09
  */
 
-namespace Tallanto\Api\Provider;
+namespace Tallanto\Api\Provider\Http;
 
 
-use Tallanto\Api\Provider\Http\Request;
+use Tallanto\Api\Provider\AbstractProvider;
+
+use Tallanto\Api\Provider\ProviderInterface;
 
 class ServiceProvider extends AbstractProvider implements ProviderInterface {
 
