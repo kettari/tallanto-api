@@ -6,7 +6,7 @@
  * Time: 20:59
  */
 
-namespace Tallanto\Api;
+namespace Tallanto\Api\Provider\Database;
 
 
 use Doctrine\DBAL\Logging\DebugStack;

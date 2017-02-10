@@ -8,26 +8,50 @@
 
 namespace Tallanto\Api\Aggregator;
 
-
-use PDO;
 use Tallanto\Api\Entity\Contact;
 
-class ContactAggregator extends DatabaseAggregator {
+class ContactAggregator extends AbstractAggregator implements AggregatorInterface {
 
   /**
-   * Searches for contacts (and fetches) in the database
+   * Total count of records available from the provider.
    *
-   * @param $query
-   * @return $this
+   * @var integer
+   */
+  protected $total_count;
+
+  /**
+   * Search entities for the substring. Searches in names, phones and emails.
+   * Result is placed to the internal storage and is iteratable.
+   *
+   * @param string $query
+   * @return bool TRUE if something were found, FALSE otherwise.
    */
   public function search($query) {
-    // Set query and clear ID
-    $this->setId(NULL);
-    $this->setQuery($query);
-    // Fetch data
-    $this->fetch();
+    // Set query and clear ID, then fetch data from the provider
+    $result = $this->provider
+      ->setQuery($query)
+      ->fetch();
+    // Parse result and fill the aggregator with objects
+    $this->parseResult($result);
+    // Store total records count
+    $this->total_count = $this->provider->totalCount();
 
-    return $this;
+    return $this->count() > 0;
+  }
+
+  /**
+   * Parse array received from the provider and create objects.
+   *
+   * @param array $result
+   */
+  protected function parseResult($result) {
+    // Clear items
+    $this->clear();
+    // Iterate rows and create Contact objects
+    foreach ($result as $row) {
+      $contact = self::createContact($row);
+      $this->append($contact);
+    }
   }
 
   /**
@@ -37,11 +61,15 @@ class ContactAggregator extends DatabaseAggregator {
    * @return null|\Tallanto\Api\Entity\Contact
    */
   public function get($id) {
-    // Set ID and clear query
-    $this->setId($id);
-    $this->setQuery(NULL);
-    // Fetch data
-    $this->fetch();
+    // Search with given ID
+    if (!$this->search($id)) {
+      // Unset total records count for safety
+      $this->total_count = NULL;
+
+      return NULL;
+    }
+    // Unset total records count for safety
+    $this->total_count = NULL;
     // Find the object by ID
     $iterator = $this->getIterator();
     while ($iterator->valid()) {
@@ -57,127 +85,33 @@ class ContactAggregator extends DatabaseAggregator {
   }
 
   /**
-   * @inheritdoc
-   */
-  function fetch() {
-    $sql = $this->getContactsSql(
-      $this->getSelectClause(),
-      $this->getWhereClause(),
-      $this->getLimitClause($this->offset, $this->limit)
-    );
-    $stmt = $this->connection->getConnection()->executeQuery(
-      $sql,
-      [
-        'contact_id' => $this->id,
-        'query'      => '%' . $this->query . '%',
-      ],
-      [
-        PDO::PARAM_STR,
-        PDO::PARAM_STR,
-      ]
-    );
-
-    // Fetch all results into associative array
-    $dataset = $stmt->fetchAll(PDO::FETCH_ASSOC);
-
-    // Clear items
-    $this->clear();
-    // Iterate rows and create Contact objects
-    foreach ($dataset as $contact_row) {
-      $contact = self::createContact($contact_row);
-      $this->append($contact);
-    }
-
-    return $this;
-  }
-
-  /**
-   * @inheritdoc
-   */
-  function totalCount() {
-    $sql = $this->getContactsSql(
-      'COUNT(DISTINCT c.id)',
-      $this->getWhereClause(),
-      ''
-    );
-    $stmt = $this->connection->getConnection()->executeQuery(
-      $sql,
-      [
-        'contact_id' => $this->id,
-        'query'      => '%' . $this->query . '%',
-      ],
-      [
-        PDO::PARAM_STR,
-        PDO::PARAM_STR,
-      ]
-    );
-
-    // Fetch column
-    $records_count = $stmt->fetchColumn();
-
-    return $records_count;
-  }
-
-
-  /**
-   * Prepare SELECT SQL clause
+   * Add (create) entity to the storage. Copy of the object
+   * is added to this aggregator's internal storage.
    *
+   * @param mixed $entity
    * @return string
+   * @throws \Exception
    */
-  protected function getSelectClause() {
-    return
-      'c.id AS contact_id,
-        c.first_name,
-        c.last_name,
-        c.phone_home,
-        c.phone_mobile,
-        c.phone_work,
-        c.phone_other,
-        c.phone_fax,
-        c.last_contact_date,
-        DATE_FORMAT(c.date_entered, "%Y-%m-%dT%H:%i:%sZ") AS "date_entered",
-        DATE_FORMAT(c.date_modified, "%Y-%m-%dT%H:%i:%sZ") AS "date_modified",
-        c.assigned_user_id AS manager_id,
-        cs.type_client_c';
+  public function add($entity) {
+    // Unset total records count for safety
+    $this->total_count = NULL;
+    // TODO: Implement add() method.
+    throw new \Exception('ContactAggregator::add() not implemented');
   }
 
   /**
-   * Prepare WHERE SQL clause
+   * Update entity in the storage.
    *
-   * @return string
+   * @param mixed $entity
+   * @throws \Exception
    */
-  protected function getWhereClause() {
-    // Format WHERE clause of the SQL statement
-    $where_clause = '';
-    if (!empty($this->id)) {
-      $where_clause .= ' AND c.id = :contact_id';
-    }
-    if (!empty($this->query)) {
-      $where_clause .= ' AND 
-        (
-          c.first_name LIKE :query OR 
-          c.last_name LIKE :query OR
-          c.phone_home LIKE :query OR
-          c.phone_mobile LIKE :query OR
-          c.phone_work LIKE :query OR
-          c.phone_other LIKE :query OR
-          c.phone_fax LIKE :query
-        )';
-    }
-
-    return $where_clause;
+  public function update($entity) {
+    // Unset total records count for safety
+    $this->total_count = NULL;
+    // TODO: Implement update() method.
+    throw new \Exception('ContactAggregator::update() not implemented');
   }
 
-  /**
-   * Get LIMIT SQL clause
-   *
-   * @param integer $items_offset
-   * @param integer $items_limit
-   * @return string
-   */
-  protected function getLimitClause($items_offset, $items_limit) {
-    return sprintf('LIMIT %d, %d', $items_offset, $items_limit);
-  }
 
   /**
    * Retrieve data from the row and return Contact object
@@ -187,7 +121,7 @@ class ContactAggregator extends DatabaseAggregator {
    */
   public static function createContact(array $row) {
     return new Contact([
-      'id'              => $row['contact_id'],
+      'id'              => $row['id'],
       'first_name'      => $row['first_name'],
       'last_name'       => $row['last_name'],
       'phone_home'      => $row['phone_home'],
@@ -204,37 +138,18 @@ class ContactAggregator extends DatabaseAggregator {
   }
 
   /**
-   * Get the SQL for Contacts.
+   * Returns total count of records available from the provider
+   * that fulfills conditions.
    *
-   * About prepared statements and LIMIT problem
-   *
-   * @see http://stackoverflow.com/a/20467350/7194257
-   *
-   * @param string $select_clause
-   * @param string $where_clause
-   * @param string $limit_clause
-   * @return string
+   * @return int
+   * @throws \Exception
    */
-  protected function getContactsSql($select_clause, $where_clause, $limit_clause) {
-    return sprintf('
-      SELECT
-        %s
-    
-      FROM contacts c
-      
-      LEFT JOIN contacts_cstm cs ON cs.id_c = c.id
-      
-      WHERE c.deleted = 0%s
-      ORDER BY c.last_name, c.first_name
-      
-      %s', $select_clause, $where_clause, $limit_clause);
-    /*
-     * e.email_addresses,
-     * LEFT JOIN email_addr_bean_rel eb ON eb.bean_id = c.id AND eb.bean_module = "Contacts"
-        AND eb.deleted = 0
-      LEFT JOIN email_addresses e ON e.id = eb.email_address_id AND e.deleted = 0
-     *
-     */
+  public function totalCount() {
+    if (is_null($this->total_count)) {
+      throw new \Exception('Unable to tell total records count prior to search() method.');
+    }
+    return $this->total_count;
   }
+
 
 }

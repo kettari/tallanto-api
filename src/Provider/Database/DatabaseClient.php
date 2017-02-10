@@ -6,7 +6,7 @@
  * Time: 21:54
  */
 
-namespace Tallanto\Api;
+namespace Tallanto\Api\Provider\Database;
 
 
 use Doctrine\DBAL\Configuration;

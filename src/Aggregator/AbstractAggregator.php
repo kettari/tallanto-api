@@ -9,11 +9,32 @@
 namespace Tallanto\Api\Aggregator;
 
 use ArrayObject;
+use Tallanto\Api\Provider\ProviderInterface;
 
 abstract class AbstractAggregator extends ArrayObject {
 
   /**
-   * Clear items
+   * Data provider
+   *
+   * @var ProviderInterface
+   */
+  protected $provider;
+
+  /**
+   * AbstractAggregator constructor.
+   *
+   * @param \Tallanto\Api\Provider\ProviderInterface $provider
+   */
+  public function __construct(ProviderInterface $provider) {
+    $this->provider = $provider;
+  }
+
+
+  /**
+   * Clears items in the internal collection. Does not change state of items
+   * in the original storage.
+   *
+   * @return void
    */
   public function clear() {
     $iterator = $this->getIterator();
@@ -21,21 +42,5 @@ abstract class AbstractAggregator extends ArrayObject {
       $iterator->offsetUnset($key);
     }
   }
-
-  /**
-   * Search for entities
-   *
-   * @param $query
-   * @return array|null
-   */
-  abstract public function search($query);
-
-  /**
-   * Get entity by ID
-   *
-   * @param string $id
-   * @return mixed
-   */
-  abstract public function get($id);
 
 }
