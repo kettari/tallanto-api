@@ -13,7 +13,7 @@ use PDO;
 
 class TicketDatabaseProvider extends AbstractDatabaseProvider {
 
-   /**
+  /**
    * Gets main SQL.
    *
    * About prepared statements and LIMIT problem
@@ -74,10 +74,14 @@ class TicketDatabaseProvider extends AbstractDatabaseProvider {
     $where_clause = '';
     if (!empty($this->query)) {
       $where_clause .= ' AND 
-        (
-          a.id = :query OR
-          a.name LIKE :query
-        )';
+        (a.id = :query_exact OR
+          a.contact_id = :query_exact OR
+          a.template_id = :query_exact';
+      if (!$this->isQueryDisableLike()) {
+        $where_clause .= ' OR
+          a.name LIKE :query_like';
+      }
+      $where_clause .= ')';
     }
 
     return $where_clause;
@@ -96,7 +100,10 @@ class TicketDatabaseProvider extends AbstractDatabaseProvider {
     );
     $stmt = $this->connection->getConnection()->executeQuery(
       $sql,
-      ['query' => '%' . $this->query . '%'],
+      [
+        'query_like'  => '%' . $this->query . '%',
+        'query_exact' => $this->query,
+      ],
       [PDO::PARAM_STR]
     );
 

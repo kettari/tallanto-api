@@ -13,7 +13,7 @@ use PDO;
 
 class ContactDatabaseProvider extends AbstractDatabaseProvider {
 
-   /**
+  /**
    * Gets main SQL.
    *
    * About prepared statements and LIMIT problem
@@ -79,16 +79,18 @@ class ContactDatabaseProvider extends AbstractDatabaseProvider {
     $where_clause = '';
     if (!empty($this->query)) {
       $where_clause .= ' AND 
-        (
-          c.id = :query OR
-          c.first_name LIKE :query OR 
-          c.last_name LIKE :query OR
-          c.phone_home LIKE :query OR
-          c.phone_mobile LIKE :query OR
-          c.phone_work LIKE :query OR
-          c.phone_other LIKE :query OR
-          c.phone_fax LIKE :query
-        )';
+        (c.id = :query_exact';
+      if (!$this->isQueryDisableLike()) {
+        $where_clause .= ' OR
+          c.first_name LIKE :query_like OR 
+          c.last_name LIKE :query_like OR
+          c.phone_home LIKE :query_like OR
+          c.phone_mobile LIKE :query_like OR
+          c.phone_work LIKE :query_like OR
+          c.phone_other LIKE :query_like OR
+          c.phone_fax LIKE :query_like';
+      }
+      $where_clause .= ')';
     }
 
     return $where_clause;
@@ -107,7 +109,10 @@ class ContactDatabaseProvider extends AbstractDatabaseProvider {
     );
     $stmt = $this->connection->getConnection()->executeQuery(
       $sql,
-      ['query' => '%' . $this->query . '%'],
+      [
+        'query_like'  => '%' . $this->query . '%',
+        'query_exact' => $this->query,
+      ],
       [PDO::PARAM_STR]
     );
 

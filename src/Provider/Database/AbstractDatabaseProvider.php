@@ -21,6 +21,11 @@ abstract class AbstractDatabaseProvider extends AbstractProvider implements Prov
   protected $connection;
 
   /**
+   * @var bool
+   */
+  protected $query_disable_like = FALSE;
+
+  /**
    * AbstractDatabaseProvider constructor.
    *
    * @param \Tallanto\Api\Provider\Database\DatabaseClient $connection
@@ -46,7 +51,10 @@ abstract class AbstractDatabaseProvider extends AbstractProvider implements Prov
     );
     $stmt = $this->connection->getConnection()->executeQuery(
       $sql,
-      ['query' => '%' . $this->query . '%'],
+      [
+        'query_like'  => '%' . $this->query . '%',
+        'query_exact' => $this->query,
+      ],
       [
         PDO::PARAM_STR,
       ]
@@ -102,5 +110,24 @@ abstract class AbstractDatabaseProvider extends AbstractProvider implements Prov
    */
   abstract function totalCount();
 
+  /**
+   * Check if LIKE is disabled in WHERE clause.
+   *
+   * @return bool
+   */
+  public function isQueryDisableLike() {
+    return $this->query_disable_like;
+  }
+
+  /**
+   * Disable LIKE in WHERE clause. Useful when requesting resource by ID.
+   *
+   * @param bool $query_disable_like
+   * @return AbstractDatabaseProvider
+   */
+  public function setQueryDisableLike($query_disable_like) {
+    $this->query_disable_like = $query_disable_like;
+    return $this;
+  }
 
 }
