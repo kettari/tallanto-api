@@ -9,6 +9,7 @@
 namespace Tallanto\Api\Provider\Database;
 
 
+use Doctrine\DBAL\Connection;
 use PDO;
 use Tallanto\Api\Provider\AbstractProvider;
 use Tallanto\Api\Provider\ProviderInterface;
@@ -16,7 +17,7 @@ use Tallanto\Api\Provider\ProviderInterface;
 abstract class AbstractDatabaseProvider extends AbstractProvider implements ProviderInterface {
 
   /**
-   * @var DatabaseClient
+   * @var Connection
    */
   protected $connection;
 
@@ -28,9 +29,9 @@ abstract class AbstractDatabaseProvider extends AbstractProvider implements Prov
   /**
    * AbstractDatabaseProvider constructor.
    *
-   * @param \Tallanto\Api\Provider\Database\DatabaseClient $connection
+   * @param \Doctrine\DBAL\Connection $connection
    */
-  public function __construct(DatabaseClient $connection) {
+  public function __construct(Connection $connection) {
     $this->connection = $connection;
   }
 
@@ -49,7 +50,7 @@ abstract class AbstractDatabaseProvider extends AbstractProvider implements Prov
       $this->getWhereClause(),
       $this->getLimitClause($offset, $this->getPageSize())
     );
-    $stmt = $this->connection->getConnection()->executeQuery(
+    $stmt = $this->connection->executeQuery(
       $sql,
       [
         'query_like'  => '%' . $this->query . '%',

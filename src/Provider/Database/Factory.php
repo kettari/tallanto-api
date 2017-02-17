@@ -9,17 +9,19 @@
 namespace Tallanto\Api\Provider\Database;
 
 
+use Doctrine\DBAL\Connection;
+
 class Factory {
 
   /**
    * Creates database provider according to provided class.
    *
    * @param string $for_aggregator_class
-   * @param \Tallanto\Api\Provider\Database\DatabaseClient $connection
+   * @param \Doctrine\DBAL\Connection $connection
    * @return \Tallanto\Api\Provider\Database\AbstractDatabaseProvider
    * @throws \Exception
    */
-  public static function build($for_aggregator_class, DatabaseClient $connection) {
+  public static function build($for_aggregator_class, Connection $connection) {
     switch ($for_aggregator_class) {
       case 'ContactAggregator':
         return new ContactDatabaseProvider($connection);

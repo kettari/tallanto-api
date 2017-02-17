@@ -107,7 +107,7 @@ class ContactDatabaseProvider extends AbstractDatabaseProvider {
       $this->getWhereClause(),
       ''
     );
-    $stmt = $this->connection->getConnection()->executeQuery(
+    $stmt = $this->connection->executeQuery(
       $sql,
       [
         'query_like'  => '%' . $this->query . '%',
