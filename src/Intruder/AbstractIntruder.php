@@ -10,11 +10,12 @@ namespace Tallanto\Api\Intruder;
 
 
 use Monolog\Logger;
+use Tallanto\Api\Exception\ConflictHttpException;
 use Tallanto\Api\Exception\HeaderNotFoundException;
+use Tallanto\Api\Exception\HttpException;
 use Tallanto\Api\Exception\InvalidHeaderException;
-use Tallanto\Api\Exception\NotLoggedException;
-use Tallanto\Api\Entity\Contact;
 use Tallanto\Api\Exception\OperationNotAuthorizedException;
+
 
 /**
  * Class AbstractIntruder
@@ -29,6 +30,11 @@ abstract class AbstractIntruder {
    * User agent string
    */
   const USER_AGENT = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/56.0.2924.87 Safari/537.36';
+
+  /**
+   * Session cookie name
+   */
+  const SESSION_COOKIE_NAME = 'PHPSESSID';
 
   protected $scheme = 'http://';
   protected $host;
@@ -72,9 +78,19 @@ abstract class AbstractIntruder {
   protected $last_error_message;
 
   /**
+   * @var string
+   */
+  protected $session_cookie;
+
+  /**
    * @var bool
    */
   protected $is_logged = FALSE;
+
+  /**
+   * @var bool
+   */
+  protected $is_debug = FALSE;
 
   /**
    * Authorizes at the Tallanto server.
@@ -86,6 +102,13 @@ abstract class AbstractIntruder {
     $url = $this->getUrl();
     $this->retrieveResource($url, [$this, 'setOptLogin']);
     $this->is_logged = $this->isLastOperationAuthorized();
+    if ($this->is_logged &&
+      isset($this->last_cookies[self::SESSION_COOKIE_NAME])
+    ) {
+      $this->session_cookie = $this->last_cookies[self::SESSION_COOKIE_NAME];
+    } else {
+      $this->session_cookie = NULL;
+    }
 
     // Add log message
     if (!is_null($this->logger)) {
@@ -151,7 +174,7 @@ abstract class AbstractIntruder {
    * Retrieves resource specified by the URL.
    *
    * @param $url
-   * @param callable $curl_setopt_callback
+   * @param mixed $curl_setopt_callback
    * @param mixed $callback_data
    * @return void
    * @throws \Exception
@@ -159,12 +182,18 @@ abstract class AbstractIntruder {
   protected function retrieveResource($url, callable $curl_setopt_callback = NULL, $callback_data = NULL) {
     try {
       // Debug part
-      $out = fopen('php://temp', 'rw+');
+      $debug = NULL;
+      $out = NULL;
+      if ($this->is_debug) {
+        $out = fopen('php://temp', 'rw+');
+      }
 
       // Create and configure cURL
       $handler = curl_init();
-      curl_setopt($handler, CURLOPT_VERBOSE, TRUE);
-      curl_setopt($handler, CURLOPT_STDERR, $out);
+      if ($this->is_debug) {
+        curl_setopt($handler, CURLOPT_VERBOSE, TRUE);
+        curl_setopt($handler, CURLOPT_STDERR, $out);
+      }
       curl_setopt($handler, CURLOPT_RETURNTRANSFER, TRUE);
       curl_setopt($handler, CURLOPT_USERAGENT, self::USER_AGENT);
       curl_setopt($handler, CURLOPT_URL, $url);
@@ -173,7 +202,13 @@ abstract class AbstractIntruder {
       curl_setopt($handler, CURLOPT_TIMEOUT, 120);
       $cookies = [];
       foreach ($this->last_cookies as $key => $value) {
+        if (self::SESSION_COOKIE_NAME == $key) {
+          continue;
+        }
         $cookies[] = $key.'='.$value;
+      }
+      if (!is_null($this->session_cookie)) {
+        $cookies[] = self::SESSION_COOKIE_NAME.'='.$this->session_cookie;
       }
       $cookies = implode(';', $cookies);
       curl_setopt($handler, CURLOPT_COOKIE, $cookies);
@@ -187,9 +222,11 @@ abstract class AbstractIntruder {
       $this->last_content = curl_exec($handler);
 
       // Debug part
-      rewind($out);
-      $debug = stream_get_contents($out);
-      fclose($out);
+      if ($this->is_debug) {
+        rewind($out);
+        $debug = stream_get_contents($out);
+        fclose($out);
+      }
 
       $this->last_http_code = curl_getinfo($handler, CURLINFO_HTTP_CODE);
       $this->last_error_number = curl_errno($handler);
@@ -204,10 +241,19 @@ abstract class AbstractIntruder {
         'headers'   => $this->last_headers,
         'cookies'   => $this->last_cookies,
       ]);
-      $this->logger->debug('cURL debug', [
-        'verbose' => $debug,
-        'content' => $this->last_content,
-      ]);
+      if ($this->is_debug) {
+        $this->logger->debug('cURL debug', [
+          'verbose' => $debug,
+          'content' => $this->last_content,
+        ]);
+      }
+
+      // Throw exception if got 4xx or 5xx from the server
+      if ($this->last_http_code >= 400) {
+        throw new HttpException('Tallanto server returned HTTP error code '.
+          $this->last_http_code, $this->last_http_code);
+      }
+
     } catch (\Exception $e) {
       if (!is_null($this->logger)) {
         $message = (!empty($this->last_error_message)) ? $this->last_error_message : $e->getMessage();
@@ -272,6 +318,107 @@ abstract class AbstractIntruder {
 
     return $cookies;
   }
+
+  /**
+   * Formats $fields array as multipart/form-data with specified boundary
+   * token.
+   *
+   * @param array $fields Array of fields to format as multipart/form-data.
+   *   Array format: [
+   *     0 => [
+   *       'name'   => 'name1',
+   *       'value'  => 'value1',
+   *       ],
+   *     1 => [
+   *       'name'   => 'name1',
+   *       'value'  => 'value2',
+   *       ],
+   *     2 => [
+   *       'name'   => 'name2',
+   *       'value'  => 'value1',
+   *       ],
+   *     ]
+   * @param string $boundary Boundary to use
+   * @return string
+   */
+  protected function multipartBuildQuery($fields, $boundary) {
+    $result = '';
+    foreach ($fields as $item) {
+      if (isset($item['name']) && isset($item['value'])) {
+        $name = $item['name'];
+        $value = $item['value'];
+        $result .= "--$boundary\r\nContent-Disposition: form-data; name=\"$name\"\r\n\r\n$value\r\n";
+      }
+    }
+    $result .= "--$boundary--";
+
+    return $result;
+  }
+
+  /**
+   * Generates random alphanumeric string.
+   *
+   * @param int $length
+   * @return string
+   */
+  protected function generateRandomString($length = 10) {
+    $characters = '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ';
+    $charactersLength = strlen($characters);
+    $randomString = '';
+    for ($i = 0; $i < $length; $i++) {
+      $randomString .= $characters[rand(0, $charactersLength - 1)];
+    }
+
+    return $randomString;
+  }
+
+  /**
+   * If Tallanto created the resource, retrieve its ID from the Location header
+   *
+   * @return string Identifier of the resource created or updated
+   * @throws \Tallanto\Api\Exception\ConflictHttpException
+   * @throws \Tallanto\Api\Exception\HeaderNotFoundException
+   * @throws \Tallanto\Api\Exception\InvalidHeaderException
+   * @throws \Tallanto\Api\Exception\OperationNotAuthorizedException
+   */
+  protected function retrieveIdentifier() {
+    if ($this->isLastOperationAuthorized()) {
+      if (isset($this->last_headers['Location'])) {
+        // Check for duplicates
+        if (FALSE !==
+          strpos($this->last_headers['Location'], 'action=ShowDuplicates')
+        ) {
+          throw new ConflictHttpException('Entity is not created: possible duplicates found.');
+        }
+        // Try to find record ID
+        if (preg_match('/record=([0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12})/',
+            $this->last_headers['Location'], $matches) && isset($matches[1])
+        ) {
+          if (!is_null($this->logger)) {
+            $this->logger->info('Created entity in the Tallanto at "{url}" with ID: {id}',
+              ['url' => $this->getUrl(), 'id' => $matches[1]]);
+          }
+
+          return $matches[1];
+        } else {
+          throw new InvalidHeaderException('Location header found but it is invalid: no entity ID is found.');
+        }
+      } else {
+        throw new HeaderNotFoundException('Location header expected and was not found in the response from the Tallanto server.');
+      }
+    } else {
+      throw new OperationNotAuthorizedException('Attempt to create new contact was not authorized by the Tallanto server.');
+    }
+  }
+
+  /**
+   * Validates data before posting to the Tallanto server. Throws errors if
+   * found errors.
+   *
+   * @param array $data
+   * @return void
+   */
+  abstract protected function validate($data);
 
   /**
    * Returns full URL.
@@ -349,6 +496,16 @@ abstract class AbstractIntruder {
    */
   public function setEndpoint($endpoint) {
     $this->endpoint = $endpoint;
+
+    return $this;
+  }
+
+  /**
+   * @param bool $is_debug
+   * @return AbstractIntruder
+   */
+  public function setDebug($is_debug) {
+    $this->is_debug = $is_debug;
 
     return $this;
   }

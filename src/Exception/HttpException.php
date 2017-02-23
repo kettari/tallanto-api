@@ -2,13 +2,13 @@
 /**
  * Created by PhpStorm.
  * User: ant
- * Date: 22.02.2017
- * Time: 13:50
+ * Date: 23.02.2017
+ * Time: 13:25
  */
 
 namespace Tallanto\Api\Exception;
 
 
-class NotLoggedException extends TallantoException {
+class HttpException extends \Exception {
 
 }

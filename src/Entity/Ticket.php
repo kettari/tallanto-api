@@ -77,6 +77,21 @@ class Ticket extends BaseEntity {
   protected $manual_closed;
 
   /**
+   * @var array
+   */
+  protected $branches;
+
+  /**
+   * @var string
+   */
+  protected $manager_id;
+
+  /**
+   * @var User
+   */
+  protected $manager;
+
+  /**
    * @return string
    */
   public function getName() {
@@ -281,6 +296,55 @@ class Ticket extends BaseEntity {
    */
   public function setManualClosed($manual_closed) {
     $this->manual_closed = $manual_closed;
+    return $this;
+  }
+
+  /**
+   * @return array
+   */
+  public function getBranches() {
+    return $this->branches;
+  }
+
+  /**
+   * @param array $branches
+   * @return Ticket
+   */
+  public function setBranches($branches) {
+    $this->branches = $branches;
+
+    return $this;
+  }
+
+  /**
+   * @return string
+   */
+  public function getManagerId() {
+    return $this->manager_id;
+  }
+
+  /**
+   * @param string $manager_id
+   * @return Contact
+   */
+  public function setManagerId($manager_id) {
+    $this->manager_id = $manager_id;
+    return $this;
+  }
+
+  /**
+   * @return \Tallanto\Api\Entity\User
+   */
+  public function getManager() {
+    return $this->manager;
+  }
+
+  /**
+   * @param \Tallanto\Api\Entity\User $manager
+   * @return Contact
+   */
+  public function setManager($manager) {
+    $this->manager = $manager;
     return $this;
   }
 

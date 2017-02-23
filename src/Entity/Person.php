@@ -24,11 +24,6 @@ class Person extends BaseEntity {
   /**
    * @var string
    */
-  protected $phone_home;
-
-  /**
-   * @var string
-   */
   protected $phone_mobile;
 
   /**
@@ -37,19 +32,14 @@ class Person extends BaseEntity {
   protected $phone_work;
 
   /**
-   * @var string
+   * @var array
    */
-  protected $phone_other;
-
-  /**
-   * @var string
-   */
-  protected $phone_fax;
+  protected $emails;
 
   /**
    * @var array
    */
-  protected $emails;
+  protected $branches;
 
   /**
    * @return string
@@ -86,22 +76,6 @@ class Person extends BaseEntity {
   /**
    * @return string
    */
-  public function getPhoneHome() {
-    return $this->phone_home;
-  }
-
-  /**
-   * @param string $phone_home
-   * @return Person
-   */
-  public function setPhoneHome($phone_home) {
-    $this->phone_home = $phone_home;
-    return $this;
-  }
-
-  /**
-   * @return string
-   */
   public function getPhoneMobile() {
     return $this->phone_mobile;
   }
@@ -132,38 +106,6 @@ class Person extends BaseEntity {
   }
 
   /**
-   * @return string
-   */
-  public function getPhoneOther() {
-    return $this->phone_other;
-  }
-
-  /**
-   * @param string $phone_other
-   * @return Person
-   */
-  public function setPhoneOther($phone_other) {
-    $this->phone_other = $phone_other;
-    return $this;
-  }
-
-  /**
-   * @return string
-   */
-  public function getPhoneFax() {
-    return $this->phone_fax;
-  }
-
-  /**
-   * @param string $phone_fax
-   * @return Person
-   */
-  public function setPhoneFax($phone_fax) {
-    $this->phone_fax = $phone_fax;
-    return $this;
-  }
-
-  /**
    * @return array
    */
   public function getEmails() {
@@ -176,6 +118,23 @@ class Person extends BaseEntity {
    */
   public function setEmails($emails) {
     $this->emails = $emails;
+    return $this;
+  }
+
+  /**
+   * @return array
+   */
+  public function getBranches() {
+    return $this->branches;
+  }
+
+  /**
+   * @param array $branches
+   * @return Person
+   */
+  public function setBranches($branches) {
+    $this->branches = $branches;
+
     return $this;
   }
 

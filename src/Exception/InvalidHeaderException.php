@@ -9,6 +9,6 @@
 namespace Tallanto\Api\Exception;
 
 
-class InvalidHeaderException extends \Exception {
+class InvalidHeaderException extends TallantoException {
 
 }

@@ -9,6 +9,6 @@
 namespace Tallanto\Api\Exception;
 
 
-class HeaderNotFoundException extends \Exception {
+class HeaderNotFoundException extends TallantoException {
 
 }

@@ -9,5 +9,5 @@
 namespace Tallanto\Api\Exception;
 
 
-class OperationNotAuthorizedException extends \Exception {
+class OperationNotAuthorizedException extends TallantoException {
 }
