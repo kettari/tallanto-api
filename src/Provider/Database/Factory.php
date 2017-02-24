@@ -27,6 +27,8 @@ class Factory {
         return new ContactDatabaseProvider($connection);
       case 'TicketAggregator':
         return new TicketDatabaseProvider($connection);
+      case 'VisitAggregator':
+        return new VisitDatabaseProvider($connection);
     }
 
     throw new \Exception('Unknown aggregator class, unable to build database provider.');

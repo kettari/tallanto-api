@@ -9,9 +9,9 @@
 namespace Tallanto\Api\Aggregator;
 
 
-use Tallanto\Api\Entity\Ticket;
+use Tallanto\Api\Entity\Visit;
 
-class TicketAggregator extends EntityAggregator {
+class VisitAggregator extends EntityAggregator {
 
   /**
    * Parse array received from the provider and create objects.
@@ -21,10 +21,10 @@ class TicketAggregator extends EntityAggregator {
   protected function parseResult($result) {
     // Clear items
     $this->clear();
-    // Iterate rows and create Ticket objects
+    // Iterate rows and create Visit objects
     foreach ($result as $row) {
-      $ticket = self::buildTicket($row);
-      $this->append($ticket);
+      $visit = self::buildVisit($row);
+      $this->append($visit);
     }
   }
 
@@ -40,7 +40,7 @@ class TicketAggregator extends EntityAggregator {
     // Unset total records count for safety
     $this->total_count = NULL;
     // TODO: Implement add() method.
-    throw new \Exception('TicketAggregator::add() not implemented');
+    throw new \Exception('VisitAggregator::add() not implemented');
   }
 
   /**
@@ -53,17 +53,17 @@ class TicketAggregator extends EntityAggregator {
     // Unset total records count for safety
     $this->total_count = NULL;
     // TODO: Implement update() method.
-    throw new \Exception('TicketAggregator::update() not implemented');
+    throw new \Exception('VisitAggregator::update() not implemented');
   }
 
   /**
-   * Retrieves data from the row and returns Ticket object.
+   * Retrieves data from the row and returns Visit object.
    *
    * @param array $row
-   * @return \Tallanto\Api\Entity\Ticket
+   * @return \Tallanto\Api\Entity\Visit
    */
-  public static function buildTicket(array $row) {
-    return new Ticket($row);
+  public static function buildVisit(array $row) {
+    return new Visit($row);
   }
 
 }

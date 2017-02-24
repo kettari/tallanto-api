@@ -12,19 +12,19 @@ namespace Tallanto\Api\Entity;
 class Visit extends BaseEntity {
 
   /**
-   * @var ClassEntity
+   * @var string
    */
-  protected $class;
+  protected $class_id;
 
   /**
-   * @var Contact
+   * @var string
    */
-  protected $contact;
+  protected $contact_id;
 
   /**
-   * @var Ticket
+   * @var string
    */
-  protected $ticket;
+  protected $ticket_id;
 
   /**
    * @var string
@@ -32,24 +32,34 @@ class Visit extends BaseEntity {
   protected $status;
 
   /**
-   * @return \Tallanto\Api\Entity\ClassEntity
+   * @var string
    */
-  public function getClass() {
-    return $this->class;
+  protected $manager_id;
+
+  /**
+   * @var bool
+   */
+  protected $self_service;
+
+  /**
+   * @return string
+   */
+  public function getClassId() {
+    return $this->class_id;
   }
 
   /**
-   * @return \Tallanto\Api\Entity\Contact
+   * @return string
    */
-  public function getContact() {
-    return $this->contact;
+  public function getContactId() {
+    return $this->contact_id;
   }
 
   /**
-   * @return \Tallanto\Api\Entity\Ticket
+   * @return string
    */
-  public function getTicket() {
-    return $this->ticket;
+  public function getTicketId() {
+    return $this->ticket_id;
   }
 
   /**
@@ -59,4 +69,17 @@ class Visit extends BaseEntity {
     return $this->status;
   }
 
+  /**
+   * @return string
+   */
+  public function getManagerId() {
+    return $this->manager_id;
+  }
+
+  /**
+   * @return bool
+   */
+  public function isSelfService() {
+    return $this->self_service;
+  }
 }
