@@ -11,7 +11,7 @@ namespace Tallanto\Api\Aggregator;
 
 use Tallanto\Api\Entity\BaseEntity;
 
-abstract class EntityAggregator extends AbstractAggregator implements AggregatorInterface {
+abstract class AbstractEntityAggregator extends AbstractAggregator implements AggregatorInterface {
 
   /**
    * Total count of records available from the provider.
@@ -28,7 +28,7 @@ abstract class EntityAggregator extends AbstractAggregator implements Aggregator
    * @return bool TRUE if something were found, FALSE otherwise.
    */
   public function search($query) {
-    // Set query and clear ID, then fetch data from the provider
+    // Set query then fetch data from the provider
     $result = $this->provider
       ->setQuery($query)
       ->fetch();

@@ -27,6 +27,39 @@ class Contact extends Person {
   protected $manager;
 
   /**
+   * Contact constructor.
+   *
+   * @param array $data
+   */
+  public function __construct($data) {
+    parent::__construct($data);
+
+    // Build Email objects
+    if (isset($data['manager']) && !is_null($data['manager'])) {
+      $this->manager = new User($data['manager']);
+      // Expanded variables are provided, set the flag
+      $this->setExpand(TRUE);
+    }
+  }
+
+  /**
+   * Serializes the object to an array
+   *
+   * @return array
+   */
+  function toArray() {
+    $vars = get_object_vars($this);
+    // Serialize Manager correctly
+    if (is_object($this->manager)) {
+      /** @var User $manager */
+      $manager = $this->manager;
+      $vars['manager'] = $manager->toArray();
+    }
+
+    return $vars;
+  }
+
+  /**
    * @return string
    */
   public function getType() {

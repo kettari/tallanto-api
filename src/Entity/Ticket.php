@@ -325,7 +325,7 @@ class Ticket extends BaseEntity {
 
   /**
    * @param string $manager_id
-   * @return Contact
+   * @return Ticket
    */
   public function setManagerId($manager_id) {
     $this->manager_id = $manager_id;
@@ -341,7 +341,7 @@ class Ticket extends BaseEntity {
 
   /**
    * @param \Tallanto\Api\Entity\User $manager
-   * @return Contact
+   * @return Ticket
    */
   public function setManager($manager) {
     $this->manager = $manager;

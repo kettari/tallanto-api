@@ -2,21 +2,21 @@
 /**
  * Created by PhpStorm.
  * User: ant
- * Date: 24.02.2017
- * Time: 18:03
+ * Date: 25.02.2017
+ * Time: 14:26
  */
 
-namespace Entity;
+namespace Tallanto\Api;
 
 
-interface ExpandableEntityInterface {
+interface ExpandableInterface {
 
   /**
    * Returns TRUE if entity is expanded, i.e. referenced objects are loaded.
    *
    * @return bool
    */
-  public function isExpanded();
+  public function isExpand();
 
   /**
    * Set expanded flag.
@@ -24,6 +24,7 @@ interface ExpandableEntityInterface {
    * @param bool $expanded
    * @return mixed
    */
-  public function setExpanded($expanded);
+  public function setExpand($expanded);
+
 
 }

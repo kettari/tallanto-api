@@ -13,7 +13,7 @@ use PDO;
 use Tallanto\Api\ExpandableInterface;
 use Tallanto\Api\ExpandableTrait;
 
-class ContactDatabaseProvider extends AbstractDatabaseProvider implements ExpandableInterface {
+class UserDatabaseProvider extends AbstractDatabaseProvider implements ExpandableInterface {
 
   use ExpandableTrait;
 
@@ -26,25 +26,18 @@ class ContactDatabaseProvider extends AbstractDatabaseProvider implements Expand
    * @return array
    */
   function fetch() {
-    $contacts = parent::fetch();
+    $users = parent::fetch();
 
-    // Expand Contacts
+    // Expand Users with emails
     if ($this->isExpand()) {
-      $user_provider = new UserDatabaseProvider($this->connection);
-      $email_provider = new ContactEmailDatabaseProvider($this->connection);
-      foreach ($contacts as $key => $item) {
-        // Manager
-        $user_provider->setQuery($item['manager_id']);
-        if ($manager = $user_provider->fetch()) {
-          $contacts[$key]['manager'] = reset($manager);
-        }
-        // Email
+      $email_provider = new UserEmailDatabaseProvider($this->connection);
+      foreach ($users as $key => $item) {
         $email_provider->setQuery($item['id']);
-        $contacts[$key]['emails'] = $email_provider->fetch();
+        $users[$key]['emails'] = $email_provider->fetch();
       }
     }
 
-    return $contacts;
+    return $users;
   }
 
   /**
@@ -64,12 +57,10 @@ class ContactDatabaseProvider extends AbstractDatabaseProvider implements Expand
       SELECT
         %s
     
-      FROM contacts c
+      FROM users u
       
-      LEFT JOIN contacts_cstm cs ON cs.id_c = c.id
-      
-      WHERE c.deleted = 0%s
-      ORDER BY c.last_name, c.first_name
+      WHERE u.deleted = 0%s
+      ORDER BY u.last_name, u.first_name
       
       %s', $select_clause, $where_clause, $limit_clause);
     /*
@@ -87,19 +78,18 @@ class ContactDatabaseProvider extends AbstractDatabaseProvider implements Expand
    * @return string
    */
   protected function getSelectClause() {
-    return 'c.id AS id,
-        c.first_name,
-        c.last_name,
-        c.phone_home,
-        c.phone_mobile,
-        c.phone_work,
-        c.phone_other,
-        c.phone_fax,
-        c.last_contact_date,
-        DATE_FORMAT(c.date_entered, "%Y-%m-%dT%H:%i:%sZ") AS "date_created",
-        DATE_FORMAT(c.date_modified, "%Y-%m-%dT%H:%i:%sZ") AS "date_updated",
-        c.assigned_user_id AS manager_id,
-        cs.type_client_c AS `type`';
+    return 'u.id AS id,
+        u.user_name,
+        u.first_name,
+        u.last_name,
+        u.phone_mobile,
+        u.phone_work,
+        u.filial AS branches,
+        DATE_FORMAT(u.date_entered, "%Y-%m-%dT%H:%i:%sZ") AS "date_created",
+        DATE_FORMAT(u.date_modified, "%Y-%m-%dT%H:%i:%sZ") AS "date_updated",
+        u.status AS user_status,
+        u.employee_status AS employee_status,
+        u.balance_money AS balance';
   }
 
   /**
@@ -112,16 +102,15 @@ class ContactDatabaseProvider extends AbstractDatabaseProvider implements Expand
     $where_clause = '';
     if (!empty($this->query)) {
       $where_clause .= ' AND 
-        (c.id = :query_exact';
+        (u.id = :query_exact OR 
+        u.user_name = :query_exact OR 
+        u.status = :query_exact';
       if (!$this->isQueryDisableLike()) {
         $where_clause .= ' OR
-          c.first_name LIKE :query_like OR 
-          c.last_name LIKE :query_like OR
-          c.phone_home LIKE :query_like OR
-          c.phone_mobile LIKE :query_like OR
-          c.phone_work LIKE :query_like OR
-          c.phone_other LIKE :query_like OR
-          c.phone_fax LIKE :query_like';
+          u.first_name LIKE :query_like OR 
+          u.last_name LIKE :query_like OR
+          u.phone_mobile LIKE :query_like OR
+          u.phone_work LIKE :query_like';
       }
       $where_clause .= ')';
     }
@@ -135,16 +124,15 @@ class ContactDatabaseProvider extends AbstractDatabaseProvider implements Expand
    * @return int
    */
   function totalCount() {
-    $sql = $this->getMainSql('COUNT(DISTINCT c.id)', $this->getWhereClause(),
+    $sql = $this->getMainSql('COUNT(DISTINCT u.id)', $this->getWhereClause(),
       '');
     $stmt = $this->connection->executeQuery($sql, [
-        'query_like'  => '%'.$this->query.'%',
-        'query_exact' => $this->query,
-      ], [PDO::PARAM_STR]);
+      'query_like'  => '%'.$this->query.'%',
+      'query_exact' => $this->query,
+    ], [PDO::PARAM_STR]);
 
     // Fetch column, it contains records count
     return $stmt->fetchColumn();
   }
-
 
 }

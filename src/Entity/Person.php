@@ -9,7 +9,12 @@
 namespace Tallanto\Api\Entity;
 
 
-class Person extends BaseEntity {
+use Tallanto\Api\ExpandableInterface;
+use Tallanto\Api\ExpandableTrait;
+
+class Person extends BaseEntity implements ExpandableInterface {
+
+  use ExpandableTrait;
 
   /**
    * @var string
@@ -40,6 +45,45 @@ class Person extends BaseEntity {
    * @var array
    */
   protected $branches;
+
+  /**
+   * Person constructor.
+   *
+   * @param array $data
+   */
+  public function __construct($data) {
+    parent::__construct($data);
+
+    // Build Email objects
+    if (isset($data['emails']) && !is_null($data['emails'])) {
+      $email_objects = [];
+      foreach ($data['emails'] as $email) {
+        $email_objects[] = new Email($email);
+      }
+      $this->emails = $email_objects;
+      // Expanded variables are provided, set the flag
+      $this->setExpand(TRUE);
+    }
+  }
+
+  /**
+   * Serializes the object to an array
+   *
+   * @return array
+   */
+  function toArray() {
+    $vars = get_object_vars($this);
+    // Serialize Emails correctly
+    if (is_array($this->emails)) {
+      $vars['emails'] = [];
+      /** @var Email $email */
+      foreach ($this->emails as $email) {
+        $vars['emails'][] = $email->toArray();
+      }
+    }
+
+    return $vars;
+  }
 
   /**
    * @return string

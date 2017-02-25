@@ -29,7 +29,7 @@ abstract class BaseEntity {
   /**
    * BaseEntity constructor.
    *
-   * @param $data
+   * @param array $data
    */
   public function __construct($data) {
     foreach ($data as $key => $val) {

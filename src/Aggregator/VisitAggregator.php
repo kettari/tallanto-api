@@ -11,7 +11,7 @@ namespace Tallanto\Api\Aggregator;
 
 use Tallanto\Api\Entity\Visit;
 
-class VisitAggregator extends EntityAggregator {
+class VisitAggregator extends AbstractEntityAggregator {
 
   /**
    * Parse array received from the provider and create objects.
@@ -40,7 +40,7 @@ class VisitAggregator extends EntityAggregator {
     // Unset total records count for safety
     $this->total_count = NULL;
     // TODO: Implement add() method.
-    throw new \Exception('VisitAggregator::add() not implemented');
+    throw new \Exception('VisitAggregatorAbstract::add() not implemented');
   }
 
   /**
@@ -53,7 +53,7 @@ class VisitAggregator extends EntityAggregator {
     // Unset total records count for safety
     $this->total_count = NULL;
     // TODO: Implement update() method.
-    throw new \Exception('VisitAggregator::update() not implemented');
+    throw new \Exception('VisitAggregatorAbstract::update() not implemented');
   }
 
   /**

@@ -22,6 +22,31 @@ class Email extends BaseEntity {
   protected $main;
 
   /**
+   * @var bool
+   */
+  protected $invalid;
+
+  /**
+   * @var bool
+   */
+  protected $opt_out;
+
+  /**
+   * BaseEntity constructor.
+   *
+   * @param array $data
+   */
+  public function __construct(array $data) {
+    parent::__construct($data);
+
+    // Correct boolean to look like boolean
+    $this->main = $this->main ? TRUE : FALSE;
+    $this->invalid = $this->invalid ? TRUE : FALSE;
+    $this->opt_out = $this->opt_out ? TRUE : FALSE;
+  }
+
+
+  /**
    * @return string
    */
   public function getAddress() {
@@ -53,6 +78,38 @@ class Email extends BaseEntity {
     return $this;
   }
 
+  /**
+   * @return bool
+   */
+  public function isInvalid() {
+    return $this->invalid;
+  }
 
+  /**
+   * @param bool $invalid
+   * @return Email
+   */
+  public function setInvalid($invalid) {
+    $this->invalid = $invalid;
+
+    return $this;
+  }
+
+  /**
+   * @return bool
+   */
+  public function isOptOut() {
+    return $this->opt_out;
+  }
+
+  /**
+   * @param bool $opt_out
+   * @return Email
+   */
+  public function setOptOut($opt_out) {
+    $this->opt_out = $opt_out;
+
+    return $this;
+  }
 
 }

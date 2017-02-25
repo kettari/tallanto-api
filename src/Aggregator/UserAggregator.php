@@ -9,9 +9,10 @@
 namespace Tallanto\Api\Aggregator;
 
 
-use Tallanto\Api\Entity\Contact;
 
-class ContactAggregator extends AbstractEntityAggregator {
+use Tallanto\Api\Entity\User;
+
+class UserAggregator extends AbstractEntityAggregator {
 
   /**
    * Parse array received from the provider and create objects.
@@ -23,12 +24,12 @@ class ContactAggregator extends AbstractEntityAggregator {
     $this->clear();
     // Iterate rows and create Contact objects
     foreach ($result as $row) {
-      $contact = self::buildContact($row);
-      $this->append($contact);
+      $user = self::buildUser($row);
+      $this->append($user);
     }
   }
 
-   /**
+  /**
    * Add (create) entity to the storage. Copy of the object
    * is added to this aggregator's internal storage.
    *
@@ -40,7 +41,7 @@ class ContactAggregator extends AbstractEntityAggregator {
     // Unset total records count for safety
     $this->total_count = NULL;
     // TODO: Implement add() method.
-    throw new \Exception('ContactAggregatorAbstract::add() not implemented');
+    throw new \Exception('UserAggregator::add() not implemented');
   }
 
   /**
@@ -53,17 +54,24 @@ class ContactAggregator extends AbstractEntityAggregator {
     // Unset total records count for safety
     $this->total_count = NULL;
     // TODO: Implement update() method.
-    throw new \Exception('ContactAggregatorAbstract::update() not implemented');
+    throw new \Exception('UserAggregator::update() not implemented');
   }
 
   /**
-   * Retrieves data from the row and returns Contact object.
+   * Retrieves data from the row and returns User object.
    *
    * @param array $row
-   * @return \Tallanto\Api\Entity\Contact
+   * @return \Tallanto\Api\Entity\User
    */
-  public static function buildContact(array $row) {
-    return new Contact($row);
+  public static function buildUser(array $row) {
+    return new User($row);
+  }
+
+  /**
+   * @param \Tallanto\Api\Provider\AbstractProvider $email_provider
+   */
+  public function setEmailProvider($email_provider) {
+    $this->email_provider = $email_provider;
   }
 
 }

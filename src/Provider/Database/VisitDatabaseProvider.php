@@ -11,7 +11,7 @@ namespace Tallanto\Api\Provider\Database;
 
 use PDO;
 
-class VisitDatabaseProvider extends AbstractDatabaseProvider {
+abstract class VisitDatabaseProvider extends AbstractDatabaseProvider {
 
   /**
    * Gets main SQL.
@@ -53,23 +53,6 @@ class VisitDatabaseProvider extends AbstractDatabaseProvider {
         DATE_FORMAT(mcc.date_modified, "%Y-%m-%dT%H:%i:%sZ") AS "date_updated",
         mcc.write_yourself AS self_service
       ';
-  }
-
-  /**
-   * Prepares WHERE SQL clause
-   *
-   * @return string
-   */
-  protected function getWhereClause() {
-    // Format WHERE clause of the SQL statement
-    $where_clause = '';
-    if (!empty($this->query)) {
-      $where_clause .= ' AND 
-        (mcc.most_class_id = :query_exact OR
-         mcc.contact_id = :query_exact)';
-    }
-
-    return $where_clause;
   }
 
   /**
