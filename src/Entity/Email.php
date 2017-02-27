@@ -9,7 +9,7 @@
 namespace Tallanto\Api\Entity;
 
 
-class Email extends BaseEntity {
+class Email extends AbstractEntity {
 
   /**
    * @var string
@@ -32,7 +32,7 @@ class Email extends BaseEntity {
   protected $opt_out;
 
   /**
-   * BaseEntity constructor.
+   * AbstractEntity constructor.
    *
    * @param array $data
    */

@@ -9,7 +9,7 @@
 namespace Tallanto\Api\Entity;
 
 
-class Ticket extends BaseEntity {
+class Ticket extends AbstractIdentifiableEntity {
 
   /**
    * @var string
@@ -19,12 +19,12 @@ class Ticket extends BaseEntity {
   /**
    * @var string
    */
-  protected $start_date;
+  protected $date_start;
 
   /**
    * @var string
    */
-  protected $finish_date;
+  protected $date_finish;
 
   /**
    * @var string
@@ -111,15 +111,15 @@ class Ticket extends BaseEntity {
    * @return string
    */
   public function getStartDate() {
-    return $this->start_date;
+    return $this->date_start;
   }
 
   /**
-   * @param string $start_date
+   * @param string $date_start
    * @return Ticket
    */
-  public function setStartDate($start_date) {
-    $this->start_date = $start_date;
+  public function setStartDate($date_start) {
+    $this->date_start = $date_start;
     return $this;
   }
 
@@ -127,15 +127,15 @@ class Ticket extends BaseEntity {
    * @return string
    */
   public function getFinishDate() {
-    return $this->finish_date;
+    return $this->date_finish;
   }
 
   /**
-   * @param string $finish_date
+   * @param string $date_finish
    * @return Ticket
    */
-  public function setFinishDate($finish_date) {
-    $this->finish_date = $finish_date;
+  public function setFinishDate($date_finish) {
+    $this->date_finish = $date_finish;
     return $this;
   }
 

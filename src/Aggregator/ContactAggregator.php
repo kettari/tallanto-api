@@ -40,7 +40,7 @@ class ContactAggregator extends AbstractEntityAggregator {
     // Unset total records count for safety
     $this->total_count = NULL;
     // TODO: Implement add() method.
-    throw new \Exception('ContactAggregatorAbstract::add() not implemented');
+    throw new \Exception('ContactAggregator::add() not implemented');
   }
 
   /**
@@ -53,7 +53,7 @@ class ContactAggregator extends AbstractEntityAggregator {
     // Unset total records count for safety
     $this->total_count = NULL;
     // TODO: Implement update() method.
-    throw new \Exception('ContactAggregatorAbstract::update() not implemented');
+    throw new \Exception('ContactAggregator::update() not implemented');
   }
 
   /**

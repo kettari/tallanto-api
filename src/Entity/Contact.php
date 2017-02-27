@@ -34,7 +34,7 @@ class Contact extends Person {
   public function __construct($data) {
     parent::__construct($data);
 
-    // Build Email objects
+    // Build User objects
     if (isset($data['manager']) && !is_null($data['manager'])) {
       $this->manager = new User($data['manager']);
       // Expanded variables are provided, set the flag
@@ -48,7 +48,7 @@ class Contact extends Person {
    * @return array
    */
   function toArray() {
-    $vars = get_object_vars($this);
+    $vars = parent::toArray();
     // Serialize Manager correctly
     if (is_object($this->manager)) {
       /** @var User $manager */

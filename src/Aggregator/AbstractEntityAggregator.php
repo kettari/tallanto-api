@@ -9,7 +9,7 @@
 namespace Tallanto\Api\Aggregator;
 
 
-use Tallanto\Api\Entity\BaseEntity;
+use Tallanto\Api\Entity\AbstractIdentifiableEntity;
 
 abstract class AbstractEntityAggregator extends AbstractAggregator implements AggregatorInterface {
 
@@ -51,7 +51,7 @@ abstract class AbstractEntityAggregator extends AbstractAggregator implements Ag
    * Get entity by ID
    *
    * @param string $id
-   * @return null|\Tallanto\Api\Entity\BaseEntity
+   * @return null|\Tallanto\Api\Entity\AbstractEntity
    */
   public function get($id) {
     // Search with given ID
@@ -66,7 +66,7 @@ abstract class AbstractEntityAggregator extends AbstractAggregator implements Ag
     // Find the object by ID
     $iterator = $this->getIterator();
     while ($iterator->valid()) {
-      /** @var BaseEntity $entity */
+      /** @var AbstractIdentifiableEntity $entity */
       $entity = $iterator->current();
       if ($id == $entity->getId()) {
         return $entity;

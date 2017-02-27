@@ -10,12 +10,9 @@ namespace Tallanto\Api\Provider\Database;
 
 
 use PDO;
-use Tallanto\Api\ExpandableInterface;
-use Tallanto\Api\ExpandableTrait;
 
-class UserDatabaseProvider extends AbstractDatabaseProvider implements ExpandableInterface {
 
-  use ExpandableTrait;
+class TeacherDatabaseProvider extends AbstractDatabaseProvider {
 
   /**
    * Fetches (loads) data from the upstream using page number, page size and
@@ -29,13 +26,11 @@ class UserDatabaseProvider extends AbstractDatabaseProvider implements Expandabl
     $users = parent::fetch();
 
     // Expand Users with emails
-    if ($this->isExpand()) {
       $email_provider = new UserEmailDatabaseProvider($this->connection);
       foreach ($users as $key => $item) {
         $email_provider->setQuery($item['id']);
         $users[$key]['emails'] = $email_provider->fetch();
       }
-    }
 
     return $users;
   }
@@ -57,9 +52,13 @@ class UserDatabaseProvider extends AbstractDatabaseProvider implements Expandabl
       SELECT
         %s
     
-      FROM users u
+      FROM most_class mc
       
-      WHERE u.deleted = 0%s
+      LEFT JOIN most_class_employees_c mce ON mce.most_class_id = mc.id AND mce.deleted = 0
+      LEFT JOIN users u ON u.id = mce.employee_id
+      LEFT JOIN stakes s ON s.id = mce.stake_id
+      
+      WHERE mc.deleted = 0%s
       ORDER BY u.last_name, u.first_name
       
       %s', $select_clause, $where_clause, $limit_clause);
@@ -82,7 +81,10 @@ class UserDatabaseProvider extends AbstractDatabaseProvider implements Expandabl
         DATE_FORMAT(u.date_modified, "%Y-%m-%dT%H:%i:%sZ") AS "date_updated",
         u.status AS user_status,
         u.employee_status AS employee_status,
-        u.balance_money AS balance';
+        u.balance_money AS balance,
+        mce.profit,
+        s.id AS stake_id,
+        s.name AS stake_name';
   }
 
   /**
@@ -94,18 +96,7 @@ class UserDatabaseProvider extends AbstractDatabaseProvider implements Expandabl
     // Format WHERE clause of the SQL statement
     $where_clause = '';
     if (!empty($this->query)) {
-      $where_clause .= ' AND 
-        (u.id = :query_exact OR 
-        u.user_name = :query_exact OR 
-        u.status = :query_exact';
-      if (!$this->isQueryDisableLike()) {
-        $where_clause .= ' OR
-          u.first_name LIKE :query_like OR 
-          u.last_name LIKE :query_like OR
-          u.phone_mobile LIKE :query_like OR
-          u.phone_work LIKE :query_like';
-      }
-      $where_clause .= ')';
+      $where_clause .= ' AND mc.id = :query_exact';
     }
 
     return $where_clause;

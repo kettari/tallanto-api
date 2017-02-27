@@ -40,7 +40,7 @@ class TicketAggregator extends AbstractEntityAggregator {
     // Unset total records count for safety
     $this->total_count = NULL;
     // TODO: Implement add() method.
-    throw new \Exception('TicketAggregatorAbstract::add() not implemented');
+    throw new \Exception('TicketAggregator::add() not implemented');
   }
 
   /**
@@ -53,7 +53,7 @@ class TicketAggregator extends AbstractEntityAggregator {
     // Unset total records count for safety
     $this->total_count = NULL;
     // TODO: Implement update() method.
-    throw new \Exception('TicketAggregatorAbstract::update() not implemented');
+    throw new \Exception('TicketAggregator::update() not implemented');
   }
 
   /**

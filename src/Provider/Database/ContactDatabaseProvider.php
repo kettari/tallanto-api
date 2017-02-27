@@ -31,7 +31,10 @@ class ContactDatabaseProvider extends AbstractDatabaseProvider implements Expand
     // Expand Contacts
     if ($this->isExpand()) {
       $user_provider = new UserDatabaseProvider($this->connection);
-      $email_provider = new ContactEmailDatabaseProvider($this->connection);
+      $user_provider->setQueryDisableLike(TRUE);
+      // Set Expand recursively
+      $user_provider->setExpand(TRUE);
+      $email_provider = (new ContactEmailDatabaseProvider($this->connection))->setQueryDisableLike(TRUE);
       foreach ($contacts as $key => $item) {
         // Manager
         $user_provider->setQuery($item['manager_id']);
@@ -44,6 +47,7 @@ class ContactDatabaseProvider extends AbstractDatabaseProvider implements Expand
       }
     }
 
+    //dump($contacts);
     return $contacts;
   }
 
@@ -72,13 +76,6 @@ class ContactDatabaseProvider extends AbstractDatabaseProvider implements Expand
       ORDER BY c.last_name, c.first_name
       
       %s', $select_clause, $where_clause, $limit_clause);
-    /*
-     * e.email_addresses,
-     * LEFT JOIN email_addr_bean_rel eb ON eb.bean_id = c.id AND eb.bean_module = "Contacts"
-        AND eb.deleted = 0
-      LEFT JOIN email_addresses e ON e.id = eb.email_address_id AND e.deleted = 0
-     *
-     */
   }
 
   /**
@@ -90,11 +87,8 @@ class ContactDatabaseProvider extends AbstractDatabaseProvider implements Expand
     return 'c.id AS id,
         c.first_name,
         c.last_name,
-        c.phone_home,
         c.phone_mobile,
         c.phone_work,
-        c.phone_other,
-        c.phone_fax,
         c.last_contact_date,
         DATE_FORMAT(c.date_entered, "%Y-%m-%dT%H:%i:%sZ") AS "date_created",
         DATE_FORMAT(c.date_modified, "%Y-%m-%dT%H:%i:%sZ") AS "date_updated",
@@ -117,11 +111,8 @@ class ContactDatabaseProvider extends AbstractDatabaseProvider implements Expand
         $where_clause .= ' OR
           c.first_name LIKE :query_like OR 
           c.last_name LIKE :query_like OR
-          c.phone_home LIKE :query_like OR
           c.phone_mobile LIKE :query_like OR
-          c.phone_work LIKE :query_like OR
-          c.phone_other LIKE :query_like OR
-          c.phone_fax LIKE :query_like';
+          c.phone_work LIKE :query_like';
       }
       $where_clause .= ')';
     }
@@ -138,9 +129,9 @@ class ContactDatabaseProvider extends AbstractDatabaseProvider implements Expand
     $sql = $this->getMainSql('COUNT(DISTINCT c.id)', $this->getWhereClause(),
       '');
     $stmt = $this->connection->executeQuery($sql, [
-        'query_like'  => '%'.$this->query.'%',
-        'query_exact' => $this->query,
-      ], [PDO::PARAM_STR]);
+      'query_like'  => '%'.$this->query.'%',
+      'query_exact' => $this->query,
+    ], [PDO::PARAM_STR]);
 
     // Fetch column, it contains records count
     return $stmt->fetchColumn();

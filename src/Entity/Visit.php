@@ -9,7 +9,7 @@
 namespace Tallanto\Api\Entity;
 
 
-class Visit extends BaseEntity {
+class Visit extends AbstractIdentifiableEntity {
 
   /**
    * @var string

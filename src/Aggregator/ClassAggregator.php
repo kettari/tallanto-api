@@ -9,9 +9,9 @@
 namespace Tallanto\Api\Aggregator;
 
 
-use Tallanto\Api\Entity\Visit;
+use Tallanto\Api\Entity\ClassEntity;
 
-class VisitAggregator extends AbstractEntityAggregator {
+class ClassAggregator extends AbstractEntityAggregator {
 
   /**
    * Parse array received from the provider and create objects.
@@ -21,14 +21,14 @@ class VisitAggregator extends AbstractEntityAggregator {
   protected function parseResult($result) {
     // Clear items
     $this->clear();
-    // Iterate rows and create Visit objects
+    // Iterate rows and create ClassEntity objects
     foreach ($result as $row) {
-      $visit = self::buildVisit($row);
-      $this->append($visit);
+      $contact = self::buildClass($row);
+      $this->append($contact);
     }
   }
 
-  /**
+   /**
    * Add (create) entity to the storage. Copy of the object
    * is added to this aggregator's internal storage.
    *
@@ -40,7 +40,7 @@ class VisitAggregator extends AbstractEntityAggregator {
     // Unset total records count for safety
     $this->total_count = NULL;
     // TODO: Implement add() method.
-    throw new \Exception('VisitAggregator::add() not implemented');
+    throw new \Exception('ClassAggregator::add() not implemented');
   }
 
   /**
@@ -53,17 +53,17 @@ class VisitAggregator extends AbstractEntityAggregator {
     // Unset total records count for safety
     $this->total_count = NULL;
     // TODO: Implement update() method.
-    throw new \Exception('VisitAggregator::update() not implemented');
+    throw new \Exception('ClassAggregator::update() not implemented');
   }
 
   /**
-   * Retrieves data from the row and returns Visit object.
+   * Retrieves data from the row and returns Contact object.
    *
    * @param array $row
-   * @return \Tallanto\Api\Entity\Visit
+   * @return \Tallanto\Api\Entity\ClassEntity
    */
-  public static function buildVisit(array $row) {
-    return new Visit($row);
+  public static function buildClass(array $row) {
+    return new ClassEntity($row);
   }
 
 }

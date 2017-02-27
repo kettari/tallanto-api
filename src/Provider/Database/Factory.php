@@ -33,6 +33,8 @@ class Factory {
         return new ClassVisitDatabaseProvider($connection);
       case 'UserAggregator':
         return new UserDatabaseProvider($connection);
+      case 'ClassAggregator':
+        return new ClassDatabaseProvider($connection);
     }
 
     throw new \Exception('Unknown aggregator class, unable to build database provider.');

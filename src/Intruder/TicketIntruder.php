@@ -49,8 +49,8 @@ class TicketIntruder extends AbstractIntruder {
     // Map data fields
     $data = $this->getTicketDataStructure();
     $data['record'] = $ticket->getId();
-    $data['start_date'] = $ticket->getStartDate();
-    $data['finish_date'] = $ticket->getFinishDate();
+    $data['date_start'] = $ticket->getStartDate();
+    $data['date_finish'] = $ticket->getFinishDate();
     // template_name
     $data['template_id'] = $ticket->getTemplateId();
     $data['contact_id'] = $ticket->getOwnerId();
@@ -122,9 +122,9 @@ class TicketIntruder extends AbstractIntruder {
       'group_ticket'                     => '0',
       'form'                             => 'common',
       'class_cost_for_inclusive'         => NULL,
-      'start_date'                       => NULL,
+      'date_start'                       => NULL,
       'duration'                         => NULL,
-      'finish_date'                      => NULL,
+      'date_finish'                      => NULL,
       'recharge_money'                   => '0',
       'most_finances_type'               => 'cash',
       'assigned_user_name'               => NULL,
@@ -213,8 +213,8 @@ class TicketIntruder extends AbstractIntruder {
                 $item['name'], $item['value']));
             }
             break;
-          case 'start_date':
-          case 'finish_date':
+          case 'date_start':
+          case 'date_finish':
             if (!preg_match('/^\d{2}\.\d{2}\.\d{4}$/', $item['value'])) {
               throw new ValidationHttpException(sprintf('Validation failed for "%s" field (ticket): must be in dd.mm.yyyy format, given "%s"',
                 $item['name'], $item['value']));
