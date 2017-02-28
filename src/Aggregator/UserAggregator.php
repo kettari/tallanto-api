@@ -15,21 +15,6 @@ use Tallanto\Api\Entity\User;
 class UserAggregator extends AbstractEntityAggregator {
 
   /**
-   * Parse array received from the provider and create objects.
-   *
-   * @param array $result
-   */
-  protected function parseResult($result) {
-    // Clear items
-    $this->clear();
-    // Iterate rows and create Contact objects
-    foreach ($result as $row) {
-      $user = self::buildUser($row);
-      $this->append($user);
-    }
-  }
-
-  /**
    * Add (create) entity to the storage. Copy of the object
    * is added to this aggregator's internal storage.
    *
@@ -58,20 +43,13 @@ class UserAggregator extends AbstractEntityAggregator {
   }
 
   /**
-   * Retrieves data from the row and returns User object.
+   * Creates User object.
    *
    * @param array $row
    * @return \Tallanto\Api\Entity\User
    */
-  public static function buildUser(array $row) {
+  protected function buildObject(array $row) {
     return new User($row);
-  }
-
-  /**
-   * @param \Tallanto\Api\Provider\AbstractProvider $email_provider
-   */
-  public function setEmailProvider($email_provider) {
-    $this->email_provider = $email_provider;
   }
 
 }

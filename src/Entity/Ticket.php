@@ -9,7 +9,12 @@
 namespace Tallanto\Api\Entity;
 
 
-class Ticket extends AbstractIdentifiableEntity {
+use Tallanto\Api\ExpandableInterface;
+use Tallanto\Api\ExpandableTrait;
+
+class Ticket extends AbstractIdentifiableEntity implements ExpandableInterface {
+
+  use ExpandableTrait, BranchesTrait;
 
   /**
    * @var string
@@ -37,14 +42,19 @@ class Ticket extends AbstractIdentifiableEntity {
   protected $template_id;
 
   /**
+   * @var
+   */
+  protected $template;
+
+  /**
    * @var string
    */
-  protected $owner_id;
+  protected $contact_id;
 
   /**
    * @var Contact
    */
-  protected $owner;
+  protected $contact;
 
   /**
    * @var integer
@@ -77,11 +87,6 @@ class Ticket extends AbstractIdentifiableEntity {
   protected $manual_closed;
 
   /**
-   * @var array
-   */
-  protected $branches;
-
-  /**
    * @var string
    */
   protected $manager_id;
@@ -90,6 +95,37 @@ class Ticket extends AbstractIdentifiableEntity {
    * @var User
    */
   protected $manager;
+
+  /**
+   * Ticket constructor.
+   *
+   * @param array $data
+   */
+  public function __construct($data) {
+    parent::__construct($data);
+
+    // Sanitize branch
+    $this->branches = $this->sanitizeBranch($this->branches);
+
+    // Build Template objects
+    if (isset($data['template']) && !is_null($data['template'])) {
+      $this->template = new Template($data['template']);
+      // Expanded variables are provided, set the flag
+      $this->setExpand(TRUE);
+    }
+    // Build Contact objects
+    if (isset($data['contact']) && !is_null($data['contact'])) {
+      $this->contact = new Contact($data['contact']);
+      // Expanded variables are provided, set the flag
+      $this->setExpand(TRUE);
+    }
+    // Build User objects
+    if (isset($data['manager']) && !is_null($data['manager'])) {
+      $this->manager = new User($data['manager']);
+      // Expanded variables are provided, set the flag
+      $this->setExpand(TRUE);
+    }
+  }
 
   /**
    * @return string
@@ -174,32 +210,32 @@ class Ticket extends AbstractIdentifiableEntity {
   /**
    * @return string
    */
-  public function getOwnerId() {
-    return $this->owner_id;
+  public function getContactId() {
+    return $this->contact_id;
   }
 
   /**
-   * @param string $owner_id
+   * @param string $contact_id
    * @return Ticket
    */
-  public function setOwnerId($owner_id) {
-    $this->owner_id = $owner_id;
+  public function setContactId($contact_id) {
+    $this->contact_id = $contact_id;
     return $this;
   }
 
   /**
    * @return \Tallanto\Api\Entity\Contact
    */
-  public function getOwner() {
-    return $this->owner;
+  public function getContact() {
+    return $this->contact;
   }
 
   /**
-   * @param \Tallanto\Api\Entity\Contact $owner
+   * @param \Tallanto\Api\Entity\Contact $contact
    * @return Ticket
    */
-  public function setOwner($owner) {
-    $this->owner = $owner;
+  public function setContact($contact) {
+    $this->contact = $contact;
     return $this;
   }
 
@@ -296,23 +332,6 @@ class Ticket extends AbstractIdentifiableEntity {
    */
   public function setManualClosed($manual_closed) {
     $this->manual_closed = $manual_closed;
-    return $this;
-  }
-
-  /**
-   * @return array
-   */
-  public function getBranches() {
-    return $this->branches;
-  }
-
-  /**
-   * @param array $branches
-   * @return Ticket
-   */
-  public function setBranches($branches) {
-    $this->branches = $branches;
-
     return $this;
   }
 

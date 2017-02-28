@@ -32,7 +32,7 @@ class Email extends AbstractEntity {
   protected $opt_out;
 
   /**
-   * AbstractEntity constructor.
+   * Email constructor.
    *
    * @param array $data
    */

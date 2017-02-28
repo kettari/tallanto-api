@@ -145,12 +145,6 @@ class ClassEntity extends AbstractIdentifiableEntity implements ExpandableInterf
    */
   function toArray() {
     $vars = parent::toArray();
-    // Serialize Subject correctly
-    if (is_object($this->subject)) {
-      /** @var Subject $manager */
-      $subject = $this->subject;
-      $vars['subject'] = $subject->toArray();
-    }
     // Serialize User correctly
     if (is_array($this->teachers)) {
       $vars['teachers'] = [];

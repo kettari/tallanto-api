@@ -11,7 +11,7 @@ namespace Tallanto\Api\Provider\Database;
 
 use PDO;
 
-abstract class VisitDatabaseProvider extends AbstractDatabaseProvider {
+abstract class AbstractVisitDatabaseProvider extends AbstractDatabaseProvider {
 
   /**
    * Gets main SQL.
@@ -31,6 +31,10 @@ abstract class VisitDatabaseProvider extends AbstractDatabaseProvider {
         %s
     
       FROM most_class_contacts_c mcc
+      
+      INNER JOIN most_class mc ON mc.id = mcc.most_class_id AND mc.deleted = 0
+      INNER JOIN contacts c ON c.id = mcc.contact_id AND c.deleted = 0
+      INNER JOIN most_abonements ma ON ma.id = mcc.most_class_abonements AND ma.deleted = 0
       
       WHERE mcc.deleted = 0%s
       

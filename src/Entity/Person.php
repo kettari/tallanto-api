@@ -73,8 +73,8 @@ class Person extends AbstractIdentifiableEntity implements ExpandableInterface {
    *
    * @return array
    */
-  function toArray() {
-    $vars = get_object_vars($this);
+  public function toArray() {
+    $vars = parent::toArray();
     // Serialize Emails correctly
     if (is_array($this->emails)) {
       $vars['emails'] = [];

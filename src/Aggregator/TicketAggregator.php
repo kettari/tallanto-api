@@ -14,21 +14,6 @@ use Tallanto\Api\Entity\Ticket;
 class TicketAggregator extends AbstractEntityAggregator {
 
   /**
-   * Parse array received from the provider and create objects.
-   *
-   * @param array $result
-   */
-  protected function parseResult($result) {
-    // Clear items
-    $this->clear();
-    // Iterate rows and create Ticket objects
-    foreach ($result as $row) {
-      $ticket = self::buildTicket($row);
-      $this->append($ticket);
-    }
-  }
-
-  /**
    * Add (create) entity to the storage. Copy of the object
    * is added to this aggregator's internal storage.
    *
@@ -57,12 +42,12 @@ class TicketAggregator extends AbstractEntityAggregator {
   }
 
   /**
-   * Retrieves data from the row and returns Ticket object.
+   * Creates Ticket object.
    *
    * @param array $row
    * @return \Tallanto\Api\Entity\Ticket
    */
-  public static function buildTicket(array $row) {
+  protected function buildObject(array $row) {
     return new Ticket($row);
   }
 

@@ -45,7 +45,23 @@ abstract class AbstractEntityAggregator extends AbstractAggregator implements Ag
    *
    * @param array $result
    */
-  abstract protected function parseResult($result);
+  protected function parseResult($result) {
+    // Clear items
+    $this->clear();
+    // Iterate rows and create objects
+    foreach ($result as $row) {
+      $object = $this->buildObject($row);
+      $this->append($object);
+    }
+  }
+
+  /**
+   * Build object using provided data.
+   *
+   * @param array $data
+   * @return mixed
+   */
+  abstract protected function buildObject(array $data);
 
   /**
    * Get entity by ID

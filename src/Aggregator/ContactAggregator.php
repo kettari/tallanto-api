@@ -13,21 +13,6 @@ use Tallanto\Api\Entity\Contact;
 
 class ContactAggregator extends AbstractEntityAggregator {
 
-  /**
-   * Parse array received from the provider and create objects.
-   *
-   * @param array $result
-   */
-  protected function parseResult($result) {
-    // Clear items
-    $this->clear();
-    // Iterate rows and create Contact objects
-    foreach ($result as $row) {
-      $contact = self::buildContact($row);
-      $this->append($contact);
-    }
-  }
-
    /**
    * Add (create) entity to the storage. Copy of the object
    * is added to this aggregator's internal storage.
@@ -57,12 +42,12 @@ class ContactAggregator extends AbstractEntityAggregator {
   }
 
   /**
-   * Retrieves data from the row and returns Contact object.
+   * Creates Contact object.
    *
    * @param array $row
    * @return \Tallanto\Api\Entity\Contact
    */
-  public static function buildContact(array $row) {
+  protected function buildObject(array $row) {
     return new Contact($row);
   }
 

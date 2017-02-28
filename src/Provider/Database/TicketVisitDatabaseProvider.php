@@ -8,7 +8,7 @@
 
 namespace Tallanto\Api\Provider\Database;
 
-class ContactVisitDatabaseProvider extends AnythingVisitDatabaseProvider {
+class TicketVisitDatabaseProvider extends AnythingVisitDatabaseProvider {
 
   /**
    * Prepares WHERE SQL clause
@@ -19,7 +19,7 @@ class ContactVisitDatabaseProvider extends AnythingVisitDatabaseProvider {
     // Format WHERE clause of the SQL statement
     $where_clause = '';
     if (!empty($this->query)) {
-      $where_clause .= ' AND mcc.contact_id = :query_exact';
+      $where_clause .= ' AND mcc.most_class_abonements = :query_exact';
     }
 
     return $where_clause;

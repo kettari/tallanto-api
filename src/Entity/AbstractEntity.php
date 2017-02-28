@@ -29,8 +29,15 @@ abstract class AbstractEntity {
    *
    * @return array
    */
-  function toArray() {
-    return get_object_vars($this);
+  public function toArray() {
+    $vars = get_object_vars($this);
+    foreach ($vars as $key => $var) {
+      if ($var instanceof AbstractEntity) {
+        $vars[$key] = $var->toArray();
+      }
+    }
+
+    return $vars;
   }
 
 }

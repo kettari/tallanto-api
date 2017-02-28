@@ -10,8 +10,60 @@ namespace Tallanto\Api\Provider\Database;
 
 
 use PDO;
+use Tallanto\Api\ExpandableInterface;
+use Tallanto\Api\ExpandableTrait;
 
-class TicketDatabaseProvider extends AbstractDatabaseProvider {
+class TicketDatabaseProvider extends AbstractDatabaseProvider implements ExpandableInterface {
+
+  use ExpandableTrait;
+
+  /**
+   * Fetches (loads) data from the upstream using page number, page size and
+   * possible ID and query values.
+   *
+   * Returns array if everything is OK.
+   *
+   * @return array
+   */
+  function fetch() {
+    $tickets = parent::fetch();
+
+    // Expand Tickets
+    if ($this->isExpand()) {
+      // Template
+      $template_provider = new TemplateDatabaseProvider($this->connection);
+      $template_provider->setQueryDisableLike(TRUE);
+      // Contact
+      $contact_provider = new ContactDatabaseProvider($this->connection);
+      // Set Expand recursively
+      $contact_provider->setExpand(TRUE)
+        ->setQueryDisableLike(TRUE);
+      // User
+      $user_provider = new UserDatabaseProvider($this->connection);
+      $user_provider->setQueryDisableLike(TRUE);
+      // Set Expand recursively
+      $user_provider->setExpand(TRUE);
+      foreach ($tickets as $key => $item) {
+        // Template
+        $template_provider->setQuery($item['template_id']);
+        if ($template = $template_provider->fetch()) {
+          $tickets[$key]['template'] = reset($template);
+        }
+        // Contact
+        $contact_provider->setQuery($item['contact_id']);
+        if ($contact = $contact_provider->fetch()) {
+          $tickets[$key]['contact'] = reset($contact);
+        }
+        // Manager
+        $user_provider->setQuery($item['manager_id']);
+        if ($manager = $user_provider->fetch()) {
+          $tickets[$key]['manager'] = reset($manager);
+        }
+      }
+    }
+
+    return $tickets;
+  }
 
   /**
    * Gets main SQL.
@@ -55,13 +107,15 @@ class TicketDatabaseProvider extends AbstractDatabaseProvider {
         DATE_FORMAT(a.finish_date, "%Y-%m-%dT%H:%i:%sZ") AS "date_finish",
         ta.name AS template_name,
         a.template_id,
-        a.contact_id AS owner_id,
+        a.contact_id,
         a.cost,
         a.cost_standard,
         a.duration,
         a.num_visit,
         a.num_visit_left,
-        a.manual_closed';
+        a.manual_closed,
+        a.assigned_user_id AS manager_id,
+        a.filial AS branches';
   }
 
   /**

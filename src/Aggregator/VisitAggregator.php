@@ -14,21 +14,6 @@ use Tallanto\Api\Entity\Visit;
 class VisitAggregator extends AbstractEntityAggregator {
 
   /**
-   * Parse array received from the provider and create objects.
-   *
-   * @param array $result
-   */
-  protected function parseResult($result) {
-    // Clear items
-    $this->clear();
-    // Iterate rows and create Visit objects
-    foreach ($result as $row) {
-      $visit = self::buildVisit($row);
-      $this->append($visit);
-    }
-  }
-
-  /**
    * Add (create) entity to the storage. Copy of the object
    * is added to this aggregator's internal storage.
    *
@@ -57,12 +42,12 @@ class VisitAggregator extends AbstractEntityAggregator {
   }
 
   /**
-   * Retrieves data from the row and returns Visit object.
+   * Creates Visit object.
    *
    * @param array $row
    * @return \Tallanto\Api\Entity\Visit
    */
-  public static function buildVisit(array $row) {
+  protected function buildObject(array $row) {
     return new Visit($row);
   }
 

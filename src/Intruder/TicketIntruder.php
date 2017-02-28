@@ -53,7 +53,7 @@ class TicketIntruder extends AbstractIntruder {
     $data['date_finish'] = $ticket->getFinishDate();
     // template_name
     $data['template_id'] = $ticket->getTemplateId();
-    $data['contact_id'] = $ticket->getOwnerId();
+    $data['contact_id'] = $ticket->getContactId();
     // owner
     $data['cost'] = $ticket->getCost();
     // cost_standard

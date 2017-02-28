@@ -8,12 +8,11 @@
 
 namespace Tallanto\Api\Aggregator;
 
+use Tallanto\Api\Entity\Template;
 
-use Tallanto\Api\Entity\ClassEntity;
+class TemplateAggregator extends AbstractEntityAggregator {
 
-class ClassAggregator extends AbstractEntityAggregator {
-
-   /**
+  /**
    * Add (create) entity to the storage. Copy of the object
    * is added to this aggregator's internal storage.
    *
@@ -25,7 +24,7 @@ class ClassAggregator extends AbstractEntityAggregator {
     // Unset total records count for safety
     $this->total_count = NULL;
     // TODO: Implement add() method.
-    throw new \Exception('ClassAggregator::add() not implemented');
+    throw new \Exception('TemplateAggregator::add() not implemented');
   }
 
   /**
@@ -38,17 +37,17 @@ class ClassAggregator extends AbstractEntityAggregator {
     // Unset total records count for safety
     $this->total_count = NULL;
     // TODO: Implement update() method.
-    throw new \Exception('ClassAggregator::update() not implemented');
+    throw new \Exception('TemplateAggregator::update() not implemented');
   }
 
   /**
-   * Creates ClassEntity object.
+   * Creates Template object.
    *
    * @param array $row
-   * @return \Tallanto\Api\Entity\ClassEntity
+   * @return \Tallanto\Api\Entity\Template
    */
   protected function buildObject(array $row) {
-    return new ClassEntity($row);
+    return new Template($row);
   }
 
 }

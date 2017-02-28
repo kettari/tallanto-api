@@ -27,8 +27,12 @@ class Factory {
         return new ContactDatabaseProvider($connection);
       case 'TicketAggregator':
         return new TicketDatabaseProvider($connection);
+      case 'TemplateAggregator':
+        return new TemplateDatabaseProvider($connection);
       case 'ContactVisitAggregator':
         return new ContactVisitDatabaseProvider($connection);
+      case 'TicketVisitAggregator':
+        return new TicketVisitDatabaseProvider($connection);
       case 'ClassVisitAggregator':
         return new ClassVisitDatabaseProvider($connection);
       case 'UserAggregator':
