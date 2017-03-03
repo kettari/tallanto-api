@@ -93,7 +93,8 @@ class ContactDatabaseProvider extends AbstractDatabaseProvider implements Expand
         DATE_FORMAT(c.date_entered, "%Y-%m-%dT%H:%i:%sZ") AS "date_created",
         DATE_FORMAT(c.date_modified, "%Y-%m-%dT%H:%i:%sZ") AS "date_updated",
         c.assigned_user_id AS manager_id,
-        cs.type_client_c AS `type`';
+        cs.type_client_c AS `type`,
+        c.filial AS branches';
   }
 
   /**

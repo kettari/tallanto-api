@@ -9,7 +9,7 @@
 namespace Tallanto\Api\Provider\Database;
 
 
-class ClassVisitDatabaseProvider extends AbstractVisitDatabaseProvider {
+class ClassVisitDatabaseProvider extends AnythingVisitDatabaseProvider {
 
   /**
    * Prepares WHERE SQL clause

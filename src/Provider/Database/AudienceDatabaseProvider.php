@@ -12,7 +12,7 @@ namespace Tallanto\Api\Provider\Database;
 use PDO;
 
 
-class SubjectDatabaseProvider extends AbstractDatabaseProvider {
+class AudienceDatabaseProvider extends AbstractDatabaseProvider {
 
   /**
    * Gets main SQL.
@@ -31,9 +31,10 @@ class SubjectDatabaseProvider extends AbstractDatabaseProvider {
       SELECT
         %s
     
-      FROM most_subject ms
+      FROM translated_lists_for_report tl
       
-      WHERE ms.deleted = 0%s
+      WHERE tl.list_name="audience_list"%s
+      ORDER BY tl.translate
       
       %s', $select_clause, $where_clause, $limit_clause);
   }
@@ -44,17 +45,8 @@ class SubjectDatabaseProvider extends AbstractDatabaseProvider {
    * @return string
    */
   protected function getSelectClause() {
-    return 'ms.id AS id,
-        DATE_FORMAT(ms.date_entered, "%Y-%m-%dT%H:%i:%sZ") AS "date_created",
-        DATE_FORMAT(ms.date_modified, "%Y-%m-%dT%H:%i:%sZ") AS "date_updated",
-        ms.name,
-        DATE_FORMAT(ms.date_start, "%Y-%m-%dT%H:%i:%sZ") AS "date_start",
-        DATE_FORMAT(ms.date_finish, "%Y-%m-%dT%H:%i:%sZ") AS "date_finish",
-        ms.description,
-        ms.status,
-        ms.most_class_calendar_hidden AS calendar_hidden,
-        ms.default_stake_id,
-        ms.filial AS branches';
+    return 'tl.value AS `key`,
+      tl.translate AS `value`';
   }
 
   /**
@@ -67,10 +59,10 @@ class SubjectDatabaseProvider extends AbstractDatabaseProvider {
     $where_clause = '';
     if (!empty($this->query)) {
       $where_clause .= ' AND 
-        (ms.id = :query_exact';
+        (tl.value = :query_exact';
       if (!$this->isQueryDisableLike()) {
         $where_clause .= ' OR
-          ms.name LIKE :query_like';
+          tl.translate LIKE :query_like';
       }
       $where_clause .= ')';
     }
@@ -84,7 +76,7 @@ class SubjectDatabaseProvider extends AbstractDatabaseProvider {
    * @return int
    */
   function totalCount() {
-    $sql = $this->getMainSql('COUNT(DISTINCT ms.id)', $this->getWhereClause(),
+    $sql = $this->getMainSql('COUNT(DISTINCT tl.value)', $this->getWhereClause(),
       '');
     $stmt = $this->connection->executeQuery($sql, [
       'query_like'  => '%'.$this->query.'%',
@@ -94,6 +86,5 @@ class SubjectDatabaseProvider extends AbstractDatabaseProvider {
     // Fetch column, it contains records count
     return $stmt->fetchColumn();
   }
-
 
 }

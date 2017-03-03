@@ -118,6 +118,8 @@ class ClassEntity extends AbstractIdentifiableEntity implements ExpandableInterf
     $this->calendar_hidden = $this->calendar_hidden ? TRUE : FALSE;
     // Sanitize branch
     $this->branches = $this->sanitizeBranch($this->branches);
+    // Sanitize audience
+    $this->audience = $this->sanitizeAudience($this->audience);
 
     // Build Subject objects
     if (isset($data['subject']) && !is_null($data['subject'])) {
@@ -461,6 +463,23 @@ class ClassEntity extends AbstractIdentifiableEntity implements ExpandableInterf
     $this->teachers = $teachers;
 
     return $this;
+  }
+
+  /**
+   * Sanitize audience and return string.
+   *
+   * @param $audience
+   * @return string
+   */
+  private function sanitizeAudience($audience) {
+    $audiences = [];
+    if (preg_match('/\^([a-zA-Z0-9_\-]+)\^/', $audience, $matches)) {
+      for ($i = 1; $i < count($matches); $i++) {
+        $audiences[] = $matches[$i];
+      }
+    }
+
+    return count($audiences) ? reset($audiences) : '';
   }
 
 }
