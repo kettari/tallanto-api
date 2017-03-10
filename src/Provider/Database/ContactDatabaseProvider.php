@@ -117,6 +117,9 @@ class ContactDatabaseProvider extends AbstractDatabaseProvider implements Expand
       }
       $where_clause .= ')';
     }
+    if (!is_null($this->getIfModifiedSince())) {
+      $where_clause .= ' AND c.date_modified > :modified_since';
+    }
 
     return $where_clause;
   }
@@ -130,9 +133,10 @@ class ContactDatabaseProvider extends AbstractDatabaseProvider implements Expand
     $sql = $this->getMainSql('COUNT(DISTINCT c.id)', $this->getWhereClause(),
       '');
     $stmt = $this->connection->executeQuery($sql, [
-      'query_like'  => '%'.$this->query.'%',
-      'query_exact' => $this->query,
-    ], [PDO::PARAM_STR]);
+      'query_like'     => '%'.$this->query.'%',
+      'query_exact'    => $this->query,
+      'modified_since' => !is_null($this->if_modified_since) ? $this->if_modified_since->format('Y-m-d H:i:s') : 0,
+    ], [PDO::PARAM_STR, PDO::PARAM_STR, PDO::PARAM_STR]);
 
     // Fetch column, it contains records count
     return $stmt->fetchColumn();

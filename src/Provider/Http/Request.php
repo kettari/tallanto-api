@@ -51,7 +51,19 @@ class Request {
   /**
    * @var array
    */
-  protected $headers = [];
+  protected $request_headers = [];
+
+  /**
+   * @var array
+   */
+  protected $response_headers = [];
+
+  /**
+   * Request constructor.
+   */
+  public function __construct() {
+    $this->request_headers['Accept'] = 'application/json';
+  }
 
   /**
    * Sets logger.
@@ -61,6 +73,7 @@ class Request {
    */
   public function setLogger(Logger $logger) {
     $this->logger = $logger;
+
     return $this;
   }
 
@@ -91,17 +104,32 @@ class Request {
     }
     $curl_result = curl_exec($handler);
     $http_code = curl_getinfo($handler, CURLINFO_HTTP_CODE);
+    // Add debug log
+    /*if ($this->logger) {
+      $this->logger->debug('cURL raw response', [
+        'raw_response' => $curl_result,
+      ]);
+    }*/
     // Split headers and body
-    list($header, $body) = explode("\r\n\r\n", $curl_result, 2);
-    $this->headers = explode("\r\n", $header);
+    list($head, $body) = explode("\r\n\r\n", $curl_result, 2);
+    $headers = explode("\r\n", $head);
+    foreach ($headers as $header_item) {
+      if (preg_match('/^([^:]+):\s?(.+)\s?$/i', $header_item, $matches) &&
+        isset($matches[1]) && isset($matches[2])
+      ) {
+        $this->response_headers[$matches[1]] = $matches[2];
+      }
+    }
 
     // Add debug log
     if ($this->logger) {
       $this->logger->debug('Server returned HTTP code {http_code}', [
-        'http_code'       => $http_code,
-        'post_fields'     => ('post' == strtolower($http_method)) ? substr(print_r($params, TRUE), 0, 2048) : NULL,
-        'response_header' => substr(print_r($header, TRUE), 0, 2048),
-        'response_body'   => substr(print_r($body, TRUE), 0, 2048),
+        'http_code'        => $http_code,
+        'post_fields'      => ('post' ==
+          strtolower($http_method)) ? substr(print_r($params, TRUE), 0,
+          2048) : NULL,
+        'response_headers' => print_r($this->response_headers, TRUE),
+        'response_body'    => substr(print_r($body, TRUE), 0, 2048),
       ]);
     }
 
@@ -109,8 +137,7 @@ class Request {
     if ((200 != $http_code) && (204 != $http_code)) {
       throw new Exception(sprintf('Server returned HTTP code %d for URI "%s"',
         $http_code, $this->getUri()));
-    }
-    elseif (200 == $http_code) {
+    } elseif (200 == $http_code) {
       // Try to decode JSON
       $result = json_decode($body, TRUE);
       if (json_last_error() != JSON_ERROR_NONE) {
@@ -119,6 +146,7 @@ class Request {
     }
 
     $this->closeHandler();
+
     return $result;
   }
 
@@ -137,16 +165,22 @@ class Request {
     curl_setopt($this->handler, CURLOPT_URL, $uri);
     curl_setopt($this->handler, CURLOPT_RETURNTRANSFER, TRUE);
     curl_setopt($this->handler, CURLOPT_USERAGENT, 'tallanto-api-client/1.0');
-    curl_setopt($this->handler, CURLOPT_HTTPHEADER, ['Accept: application/json']);
+    $headers = [];
+    foreach ($this->request_headers as $header_name => $header_value) {
+      $headers[] = $header_name.': '.$header_value;
+    }
+    curl_setopt($this->handler, CURLOPT_HTTPHEADER, $headers);
     curl_setopt($this->handler, CURLOPT_HEADER, TRUE);
     curl_setopt($this->handler, CURLOPT_SSL_VERIFYPEER, 0);
     curl_setopt($this->handler, CURLOPT_SSL_VERIFYHOST, 0);
     curl_setopt($this->handler, CURLOPT_HTTPAUTH, CURLAUTH_BASIC);
-    curl_setopt($this->handler, CURLOPT_USERPWD, sprintf('%s:%s', $this->getLogin(), $this->getApiHash()));
+    curl_setopt($this->handler, CURLOPT_USERPWD,
+      sprintf('%s:%s', $this->getLogin(), $this->getApiHash()));
 
     if ($this->logger) {
       $this->logger->debug('Created cURL handler with URI "{uri}"', [
-        'uri' => $uri,
+        'uri'     => $uri,
+        'headers' => $this->request_headers,
       ]);
     }
 
@@ -163,7 +197,7 @@ class Request {
     $params = '';
     foreach ($this->parameters as $key => $value) {
       $params .= empty($params) ? '?' : '&';
-      $params .= urlencode($key) . '=' . urlencode($value);
+      $params .= urlencode($key).'='.urlencode($value);
     }
     // Build URI
     $uri = sprintf('%s%s%s', $this->getUrl(), $this->getMethod(), $params);
@@ -188,6 +222,7 @@ class Request {
    */
   public function setUrl($url) {
     $this->url = $url;
+
     return $this;
   }
 
@@ -208,6 +243,7 @@ class Request {
    */
   public function setMethod($method) {
     $this->method = $method;
+
     return $this;
   }
 
@@ -228,6 +264,7 @@ class Request {
    */
   public function setLogin($login) {
     $this->login = $login;
+
     return $this;
   }
 
@@ -248,6 +285,7 @@ class Request {
    */
   public function setApiHash($api_hash) {
     $this->api_hash = $api_hash;
+
     return $this;
   }
 
@@ -284,14 +322,33 @@ class Request {
    */
   public function setParameters($parameters) {
     $this->parameters = $parameters;
+
     return $this;
   }
 
   /**
    * @return array
    */
-  public function getHeaders() {
-    return $this->headers;
+  public function getResponseHeaders() {
+    return $this->response_headers;
+  }
+
+  /**
+   * @param string $header_name
+   * @param string $header_value
+   * @return Request
+   */
+  public function setRequestHeader($header_name, $header_value) {
+    $this->request_headers[$header_name] = $header_value;
+
+    return $this;
+  }
+
+  /**
+   * @return array
+   */
+  public function getRequestHeaders() {
+    return $this->request_headers;
   }
 
 }

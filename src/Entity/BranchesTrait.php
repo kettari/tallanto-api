@@ -40,6 +40,9 @@ trait BranchesTrait {
    * @return array
    */
   private function sanitizeBranch($branch) {
+    if (is_array($branch)) {
+      return $branch;
+    }
     $branches = [];
     if (preg_match('/\^([a-zA-Z0-9_\-]+)\^/', $branch, $matches)) {
       for ($i = 1; $i < count($matches); $i++) {

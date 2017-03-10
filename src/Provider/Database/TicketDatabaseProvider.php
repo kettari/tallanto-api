@@ -98,8 +98,7 @@ class TicketDatabaseProvider extends AbstractDatabaseProvider implements Expanda
    * @return string
    */
   protected function getSelectClause() {
-    return
-      'a.id AS id,
+    return 'a.id AS id,
         DATE_FORMAT(a.date_entered, "%Y-%m-%dT%H:%i:%sZ") AS "date_created",
         DATE_FORMAT(a.date_modified, "%Y-%m-%dT%H:%i:%sZ") AS "date_updated",
         a.name,
@@ -137,6 +136,9 @@ class TicketDatabaseProvider extends AbstractDatabaseProvider implements Expanda
       }
       $where_clause .= ')';
     }
+    if (!is_null($this->getIfModifiedSince())) {
+      $where_clause .= ' AND a.date_modified > :modified_since';
+    }
 
     return $where_clause;
   }
@@ -147,19 +149,13 @@ class TicketDatabaseProvider extends AbstractDatabaseProvider implements Expanda
    * @return int
    */
   function totalCount() {
-    $sql = $this->getMainSql(
-      'COUNT(DISTINCT a.id)',
-      $this->getWhereClause(),
-      ''
-    );
-    $stmt = $this->connection->executeQuery(
-      $sql,
-      [
-        'query_like'  => '%' . $this->query . '%',
-        'query_exact' => $this->query,
-      ],
-      [PDO::PARAM_STR]
-    );
+    $sql = $this->getMainSql('COUNT(DISTINCT a.id)', $this->getWhereClause(),
+      '');
+    $stmt = $this->connection->executeQuery($sql, [
+      'query_like'     => '%'.$this->query.'%',
+      'query_exact'    => $this->query,
+      'modified_since' => !is_null($this->if_modified_since) ? $this->if_modified_since->format('Y-m-d H:i:s') : 0,
+    ], [PDO::PARAM_STR, PDO::PARAM_STR, PDO::PARAM_STR]);
 
     // Fetch column, it contains records count
     return $stmt->fetchColumn();

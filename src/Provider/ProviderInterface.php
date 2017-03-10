@@ -19,14 +19,23 @@ interface ProviderInterface {
    *
    * @return array
    */
-  function fetch();
+  public function fetch();
+
+  /**
+   * Fetches all rows from the upstream.
+   *
+   * Returns array if everything is OK.
+   *
+   * @return array
+   */
+  public function fetchAll();
 
   /**
    * Returns total number of records that fulfil the criteria.
    *
    * @return integer
    */
-  function totalCount();
+  public function totalCount();
 
   /**
    * Returns current page number.

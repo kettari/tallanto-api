@@ -43,43 +43,56 @@ class ServiceProvider extends AbstractProvider implements ProviderInterface {
    * @return array
    */
   function fetch() {
-    $result = $this->request
-      ->setParameters([
-        'page_number' => $this->getPageNumber(),
-        'page_size'   => $this->getPageSize(),
-        'total_count' => 'true',
-        'q'           => $this->query,
-      ])
+    $result = $this->request->setParameters([
+      'page_number' => $this->getPageNumber(),
+      'page_size'   => $this->getPageSize(),
+      'total_count' => 'true',
+      'q'           => $this->query,
+    ])
       ->get();
-    // Parse HTTP headers
-    $this->parseHeaders($this->request->getHeaders());
-    /*if ($this->logger) {
-      $this->logger->debug('Headers', ['headers' => print_r($this->request->getHeaders(), TRUE)]);
-    }*/
+
+    // To be parsed correctly, $result should not be NULL
+    if (is_null($result)) {
+      $result = [];
+    }
+
+    // Find total count header
+    $response_headers = $this->request->getResponseHeaders();
+    if (isset($response_headers['X-Total-Count'])) {
+      $this->total_count = $response_headers['X-Total-Count'];
+    } else {
+      $this->total_count = NULL;
+    }
+
     return $result;
   }
 
   /**
-   * Parse headers received from the REST service.
+   * Fetches all rows from the upstream.
    *
-   * @param array $headers
+   * Returns array if everything is OK.
+   *
+   * @return array
    */
-  protected function parseHeaders($headers) {
-    foreach ($headers as $header) {
-      // Find total count header
-      if (preg_match('/X-Total-Count: ([0-9]+)/', $header, $matches) && isset($matches[1])) {
-        $this->total_count = $matches[1];
+  public function fetchAll() {
+    $result = [];
+    $this->setPageNumber(1);
+    do {
+      $part = $this->fetch();
+      if (is_array($part) && (count($part) > 0)) {
+        $result = array_merge($result, $part);
       }
-    }
+      $this->setPageNumber($this->getPageNumber() + 1);
+    } while (($this->total_count > 0) && (count($result) < $this->total_count));
+
+    return $result;
   }
+
 
   /**
    * @inheritdoc
    */
   function totalCount() {
-    if (is_null($this->total_count)) {
-      throw new \Exception('Unable to tell total records count prior to fetch() method.');
-    }
     return $this->total_count;
   }
 

@@ -25,14 +25,20 @@ abstract class AbstractEntityAggregator extends AbstractAggregator implements Ag
    * Result is placed to the internal storage and is iteratable.
    *
    * @param string $query
+   * @param bool $fetch_all
    * @return bool TRUE if something were found, FALSE otherwise.
    */
-  public function search($query) {
+  public function search($query, $fetch_all = FALSE) {
     // Set query then fetch data from the provider
-    $result = $this->provider
-      ->setQuery($query)
-      ->fetch();
+    $this->provider->setQuery($query);
+    if ($fetch_all) {
+      $result = $this->provider->fetchAll();
+    } else {
+      $result = $this->provider->fetch();
+    }
+
     // Parse result and fill the aggregator with objects
+    //dump($result);
     $this->parseResult($result);
     // Store total records count
     $this->total_count = $this->provider->totalCount();
@@ -122,6 +128,7 @@ abstract class AbstractEntityAggregator extends AbstractAggregator implements Ag
     if (is_null($this->total_count)) {
       throw new \Exception('Unable to tell total records count prior to search() method.');
     }
+
     return $this->total_count;
   }
 

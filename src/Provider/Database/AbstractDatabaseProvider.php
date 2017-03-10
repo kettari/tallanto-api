@@ -45,24 +45,32 @@ abstract class AbstractDatabaseProvider extends AbstractProvider implements Prov
    */
   function fetch() {
     $offset = ($this->getPageNumber() - 1) * $this->getPageSize();
-    $sql = $this->getMainSql(
-      $this->getSelectClause(),
-      $this->getWhereClause(),
-      $this->getLimitClause($offset, $this->getPageSize())
-    );
-    $stmt = $this->connection->executeQuery(
-      $sql,
-      [
-        'query_like'  => '%' . $this->query . '%',
-        'query_exact' => $this->query,
-      ],
-      [
-        PDO::PARAM_STR,
-      ]
-    );
+    $sql = $this->getMainSql($this->getSelectClause(), $this->getWhereClause(),
+      $this->getLimitClause($offset, $this->getPageSize()));
+    $stmt = $this->connection->executeQuery($sql, [
+      'query_like'     => '%'.$this->query.'%',
+      'query_exact'    => $this->query,
+      'modified_since' => !is_null($this->if_modified_since) ? $this->if_modified_since->format('Y-m-d H:i:s') : 0,
+    ], [
+      PDO::PARAM_STR,
+      PDO::PARAM_STR,
+      PDO::PARAM_STR,
+    ]);
 
     // Fetch all results into associative array
     return $stmt->fetchAll(PDO::FETCH_ASSOC);
+  }
+
+  /**
+   * Fetches all rows from the upstream.
+   *
+   * Returns array if everything is OK.
+   *
+   * @return array
+   * @throws \Exception
+   */
+  public function fetchAll() {
+    throw new \Exception('Database provider does not allow fetchAll() method.');
   }
 
   /**
@@ -128,6 +136,7 @@ abstract class AbstractDatabaseProvider extends AbstractProvider implements Prov
    */
   public function setQueryDisableLike($query_disable_like) {
     $this->query_disable_like = $query_disable_like;
+
     return $this;
   }
 
