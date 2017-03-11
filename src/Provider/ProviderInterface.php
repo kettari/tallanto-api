@@ -12,8 +12,8 @@ namespace Tallanto\Api\Provider;
 interface ProviderInterface {
 
   /**
-   * Fetches (loads) data from the upstream using page number, page size and possible ID
-   * and query values.
+   * Fetches (loads) data from the upstream using page number, page size and
+   * possible ID and query values.
    *
    * Returns array if everything is OK.
    *
@@ -26,9 +26,10 @@ interface ProviderInterface {
    *
    * Returns array if everything is OK.
    *
+   * @param callable $callback Callback to invoke while fetching data.
    * @return array
    */
-  public function fetchAll();
+  public function fetchAll(callable $callback = NULL);
 
   /**
    * Returns total number of records that fulfil the criteria.

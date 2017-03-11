@@ -66,10 +66,11 @@ abstract class AbstractDatabaseProvider extends AbstractProvider implements Prov
    *
    * Returns array if everything is OK.
    *
+   * @param callable $callback Callback to invoke while fetching data.
    * @return array
    * @throws \Exception
    */
-  public function fetchAll() {
+  public function fetchAll(callable $callback = NULL) {
     throw new \Exception('Database provider does not allow fetchAll() method.');
   }
 

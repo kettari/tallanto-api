@@ -9,11 +9,14 @@
 namespace Tallanto\Api\Provider\Http;
 
 
+use Tallanto\Api\ExpandableInterface;
+use Tallanto\Api\ExpandableTrait;
 use Tallanto\Api\Provider\AbstractProvider;
-
 use Tallanto\Api\Provider\ProviderInterface;
 
-class ServiceProvider extends AbstractProvider implements ProviderInterface {
+class ServiceProvider extends AbstractProvider implements ProviderInterface, ExpandableInterface {
+
+  use ExpandableTrait;
 
   /**
    * @var Request
@@ -48,21 +51,18 @@ class ServiceProvider extends AbstractProvider implements ProviderInterface {
       'page_size'   => $this->getPageSize(),
       'total_count' => 'true',
       'q'           => $this->query,
+      'expand'      => ($this->isExpand()) ? 'true' : 'false',
     ])
-      ->get();
+                            ->get();
 
     // To be parsed correctly, $result should not be NULL
     if (is_null($result)) {
       $result = [];
     }
 
-    // Find total count header
+    // Get total count of records
     $response_headers = $this->request->getResponseHeaders();
-    if (isset($response_headers['X-Total-Count'])) {
-      $this->total_count = $response_headers['X-Total-Count'];
-    } else {
-      $this->total_count = NULL;
-    }
+    $this->total_count = isset($response_headers['X-Total-Count']) ? $response_headers['X-Total-Count'] : 0;
 
     return $result;
   }
@@ -72,18 +72,48 @@ class ServiceProvider extends AbstractProvider implements ProviderInterface {
    *
    * Returns array if everything is OK.
    *
+   * @param callable $callback Callback to invoke while fetching data.
    * @return array
    */
-  public function fetchAll() {
+  public function fetchAll(callable $callback = NULL) {
     $result = [];
     $this->setPageNumber(1);
     do {
+      // Call regular fetch() method
       $part = $this->fetch();
+      // Merge part of data if there are data rows
       if (is_array($part) && (count($part) > 0)) {
         $result = array_merge($result, $part);
       }
+
+      // Invoke callback when loading is in progress
+      if (!is_null($callback)) {
+        if (1 == $this->getPageNumber()) {
+          call_user_func_array($callback, [
+            'status'      => 'start',
+            'data'        => $part,
+            'total_count' => $this->total_count,
+          ]);
+        } else {
+          call_user_func_array($callback, [
+            'status'      => 'loading',
+            'data'        => $part,
+            'total_count' => $this->total_count,
+          ]);
+        }
+      }
+      // Advance one page further
       $this->setPageNumber($this->getPageNumber() + 1);
     } while (($this->total_count > 0) && (count($result) < $this->total_count));
+
+    // Invoke callback when data is fully loaded
+    if (!is_null($callback)) {
+      call_user_func_array($callback, [
+        'status'      => 'loaded',
+        'data'        => $result,
+        'total_count' => $this->total_count,
+      ]);
+    }
 
     return $result;
   }
