@@ -9,12 +9,11 @@
 namespace Tallanto\Api\Aggregator;
 
 
+use Tallanto\Api\Entity\ContactTemp;
 
-use Tallanto\Api\Entity\Branch;
+class ContactTempAggregator extends AbstractEntityAggregator {
 
-class BranchAggregator extends AbstractEntityAggregator {
-
-  /**
+   /**
    * Add (create) entity to the storage. Copy of the object
    * is added to this aggregator's internal storage.
    *
@@ -23,7 +22,7 @@ class BranchAggregator extends AbstractEntityAggregator {
    * @throws \Exception
    */
   public function add($entity) {
-    throw new \Exception('AudienceAggregator::add() not implemented');
+    throw new \Exception('ContactTempAggregator::add() not implemented');
   }
 
   /**
@@ -33,18 +32,17 @@ class BranchAggregator extends AbstractEntityAggregator {
    * @throws \Exception
    */
   public function update($entity) {
-    throw new \Exception('AudienceAggregator::update() not implemented');
+    throw new \Exception('ContactTempAggregator::update() not implemented');
   }
 
   /**
-   * Creates Audience object.
+   * Creates ContactTemp object.
    *
    * @param array $row
-   * @return \Tallanto\Api\Entity\Branch
+   * @return \Tallanto\Api\Entity\ContactTemp
    */
   protected function buildObject(array $row) {
-    return new Branch($row);
+    return new ContactTemp($row);
   }
-
 
 }

@@ -25,6 +25,8 @@ class Factory {
     switch ($for_aggregator_class) {
       case 'ContactAggregator':
         return new ContactDatabaseProvider($connection);
+      case 'ContactTempAggregator':
+        return new ContactTempDatabaseProvider($connection);
       case 'TicketAggregator':
         return new TicketDatabaseProvider($connection);
       case 'TemplateAggregator':

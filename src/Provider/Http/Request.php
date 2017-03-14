@@ -8,8 +8,10 @@
 
 namespace Tallanto\Api\Provider\Http;
 
-use Exception;
+
 use Monolog\Logger;
+use Tallanto\Api\Exception\HttpException;
+use Tallanto\Api\Exception\JsonException;
 
 class Request {
 
@@ -104,12 +106,19 @@ class Request {
     }
     $curl_result = curl_exec($handler);
     $http_code = curl_getinfo($handler, CURLINFO_HTTP_CODE);
+
     // Add debug log
     /*if ($this->logger) {
       $this->logger->debug('cURL raw response', [
         'raw_response' => $curl_result,
       ]);
     }*/
+
+    // Check for general error
+    if (FALSE === $curl_result) {
+      throw new HttpException(curl_error($handler));
+    }
+
     // Split headers and body
     list($head, $body) = explode("\r\n\r\n", $curl_result, 2);
     $headers = explode("\r\n", $head);
@@ -135,13 +144,13 @@ class Request {
 
     // Check HTTP code
     if ((200 != $http_code) && (204 != $http_code)) {
-      throw new Exception(sprintf('Server returned HTTP code %d for URI "%s"',
+      throw new HttpException(sprintf('Server returned HTTP code %d for URI "%s"',
         $http_code, $this->getUri()));
     } elseif (200 == $http_code) {
       // Try to decode JSON
       $result = json_decode($body, TRUE);
       if (json_last_error() != JSON_ERROR_NONE) {
-        throw new Exception('Error decoding JSON');
+        throw new JsonException('Error decoding JSON: '.json_last_error_msg());
       }
     }
 

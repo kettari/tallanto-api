@@ -21,9 +21,6 @@ class TemplateAggregator extends AbstractEntityAggregator {
    * @throws \Exception
    */
   public function add($entity) {
-    // Unset total records count for safety
-    $this->total_count = NULL;
-    // TODO: Implement add() method.
     throw new \Exception('TemplateAggregator::add() not implemented');
   }
 
@@ -34,9 +31,6 @@ class TemplateAggregator extends AbstractEntityAggregator {
    * @throws \Exception
    */
   public function update($entity) {
-    // Unset total records count for safety
-    $this->total_count = NULL;
-    // TODO: Implement update() method.
     throw new \Exception('TemplateAggregator::update() not implemented');
   }
 
