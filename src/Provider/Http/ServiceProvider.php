@@ -53,7 +53,7 @@ class ServiceProvider extends AbstractProvider implements ProviderInterface, Exp
       'q'           => $this->query,
       'expand'      => ($this->isExpand()) ? 'true' : 'false',
     ])
-                            ->get();
+      ->get();
 
     // To be parsed correctly, $result should not be NULL
     if (is_null($result)) {
@@ -102,6 +102,12 @@ class ServiceProvider extends AbstractProvider implements ProviderInterface, Exp
           ]);
         }
       }
+
+      // Check HTTP 204
+      if (204 == $this->request->getLastHttpCode()) {
+        break;
+      }
+
       // Advance one page further
       $this->setPageNumber($this->getPageNumber() + 1);
     } while (($this->total_count > 0) && (count($result) < $this->total_count));

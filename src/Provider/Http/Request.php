@@ -61,6 +61,11 @@ class Request {
   protected $response_headers = [];
 
   /**
+   * @var int
+   */
+  protected $last_http_code = 0;
+
+  /**
    * Request constructor.
    */
   public function __construct() {
@@ -106,6 +111,7 @@ class Request {
     }
     $curl_result = curl_exec($handler);
     $http_code = curl_getinfo($handler, CURLINFO_HTTP_CODE);
+    $this->last_http_code = $http_code;
 
     // Add debug log
     /*if ($this->logger) {
@@ -358,6 +364,13 @@ class Request {
    */
   public function getRequestHeaders() {
     return $this->request_headers;
+  }
+
+  /**
+   * @return int
+   */
+  public function getLastHttpCode() {
+    return $this->last_http_code;
   }
 
 }
