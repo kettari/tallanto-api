@@ -64,6 +64,10 @@ class ServiceProvider extends AbstractProvider implements ProviderInterface, Exp
     $response_headers = $this->request->getResponseHeaders();
     $this->total_count = isset($response_headers['X-Total-Count']) ? $response_headers['X-Total-Count'] : 0;
 
+    // Allow some debug
+    $this->logger->debug('Fetched {result_count} items with total count = {total_count}',
+      ['result_count' => count($result), 'total_count' => $this->total_count]);
+
     return $result;
   }
 
