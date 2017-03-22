@@ -126,15 +126,28 @@ class TicketDatabaseProvider extends AbstractDatabaseProvider implements Expanda
     // Format WHERE clause of the SQL statement
     $where_clause = '';
     if (!empty($this->query)) {
-      $where_clause .= ' AND 
+
+      // If query is a date, then look in date fields only
+      if (preg_match('/\d{2}\.\d{2}\.\d{4}/', $this->query)) {
+
+        $where_clause .= ' AND 
+        ( DATE_FORMAT(a.date_entered, "%d.%m.%Y") = :query_exact OR
+          DATE_FORMAT(a.date_modified, "%d.%m.%Y") = :query_exact OR
+          DATE_FORMAT(a.start_date, "%d.%m.%Y") = :query_exact OR
+          DATE_FORMAT(a.finish_date, "%d.%m.%Y") = :query_exact )';
+
+      } else {
+        // Query is not date
+        $where_clause .= ' AND 
         (a.id = :query_exact OR
           a.contact_id = :query_exact OR
           a.template_id = :query_exact';
-      if (!$this->isQueryDisableLike()) {
-        $where_clause .= ' OR
+        if (!$this->isQueryDisableLike()) {
+          $where_clause .= ' OR
           a.name LIKE :query_like';
+        }
+        $where_clause .= ')';
       }
-      $where_clause .= ')';
     }
     if (!is_null($this->getIfModifiedSince())) {
       $where_clause .= ' AND a.date_modified > :modified_since';
