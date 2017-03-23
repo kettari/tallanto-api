@@ -31,13 +31,23 @@ abstract class AbstractEntityAggregator extends AbstractAggregator implements Ag
    * @return bool Returns TRUE if at least one record was found
    */
   public function search($query) {
-    return $this->searchEx($query);
+    // Set query then fetch data from the provider
+    $this->provider->setQuery($query);
+    $result = $this->provider->fetch();
+
+    // Parse result and fill the aggregator with objects
+    $this->parseResult($result);
+    // Store total records count
+    $this->total_count = $this->provider->totalCount();
+
+    return $this->count() > 0;
   }
 
   /**
    * Search entities for the substring. Searches in names, phones and emails.
-   * Result is placed to the internal storage and is iteratable. Loads all
-   * records taking into account pagination.
+   * Result is placed to the internal storage and is iteratable.
+   *
+   * Loads all records taking into account pagination.
    *
    * @param string $query
    * @param callable|NULL $callback
@@ -46,12 +56,7 @@ abstract class AbstractEntityAggregator extends AbstractAggregator implements Ag
   public function searchEx($query, callable $callback = NULL) {
     // Set query then fetch data from the provider
     $this->provider->setQuery($query);
-    if (is_null($callback)) {
-      $result = $this->provider->fetch();
-    }
-    else {
-      $result = $this->provider->fetchAll($callback);
-    }
+    $result = $this->provider->fetchAll($callback);
 
     // Parse result and fill the aggregator with objects
     $this->parseResult($result);

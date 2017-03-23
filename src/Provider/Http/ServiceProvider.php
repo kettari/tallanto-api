@@ -81,14 +81,16 @@ class ServiceProvider extends AbstractProvider implements ProviderInterface, Exp
    */
   public function fetchAll(callable $callback = NULL) {
     $result = [];
-    $this->setPageNumber(1);
+    $current_page = 0;
+
+    // Iterate while everything is not loaded
     do {
+      // Advance one page further
+      $this->setPageNumber(++$current_page);
+
       // Call regular fetch() method
       $part = $this->fetch();
-      // Merge part of data if there are data rows
-      if (is_array($part) && (count($part) > 0)) {
-        $result = array_merge($result, $part);
-      }
+      $result = array_merge($result, $part);
 
       // Invoke callback when loading is in progress
       if (!is_null($callback)) {
@@ -107,14 +109,7 @@ class ServiceProvider extends AbstractProvider implements ProviderInterface, Exp
         }
       }
 
-      // Check HTTP 204
-      if (204 == $this->request->getLastHttpCode()) {
-        break;
-      }
-
-      // Advance one page further
-      $this->setPageNumber($this->getPageNumber() + 1);
-    } while (($this->total_count > 0) && (count($result) < $this->total_count));
+    } while (count($part) == $this->getPageSize());
 
     // Invoke callback when data is fully loaded
     if (!is_null($callback)) {
