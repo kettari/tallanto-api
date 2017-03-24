@@ -9,14 +9,14 @@
 namespace Tallanto\Api\Provider\Http;
 
 
-use Monolog\Logger;
+use Psr\Log\LoggerInterface;
 use Tallanto\Api\Exception\HttpException;
 use Tallanto\Api\Exception\JsonException;
 
 class Request {
 
   /**
-   * @var Logger
+   * @var LoggerInterface
    */
   protected $logger;
 
@@ -75,10 +75,10 @@ class Request {
   /**
    * Sets logger.
    *
-   * @param \Monolog\Logger $logger
+   * @param  LoggerInterface $logger
    * @return Request
    */
-  public function setLogger(Logger $logger) {
+  public function setLogger(LoggerInterface $logger) {
     $this->logger = $logger;
 
     return $this;

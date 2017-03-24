@@ -9,7 +9,7 @@
 namespace Tallanto\Api\Intruder;
 
 
-use Monolog\Logger;
+use Psr\Log\LoggerInterface;
 use Tallanto\Api\Exception\ConflictHttpException;
 use Tallanto\Api\Exception\HeaderNotFoundException;
 use Tallanto\Api\Exception\HttpException;
@@ -43,7 +43,7 @@ abstract class AbstractIntruder {
   protected $password;
 
   /**
-   * @var Logger
+   * @var  LoggerInterface
    */
   protected $logger;
 
@@ -481,7 +481,7 @@ abstract class AbstractIntruder {
   }
 
   /**
-   * @param \Monolog\Logger $logger
+   * @param  LoggerInterface $logger
    * @return AbstractIntruder
    */
   public function setLogger($logger) {

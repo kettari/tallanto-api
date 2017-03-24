@@ -10,12 +10,12 @@ namespace Tallanto\Api\Provider;
 
 
 use DateTime;
-use Monolog\Logger;
+use Psr\Log\LoggerInterface;
 
 class AbstractProvider {
 
   /**
-   * @var Logger
+   * @var  LoggerInterface
    */
   protected $logger;
 
@@ -42,7 +42,7 @@ class AbstractProvider {
   /**
    * Set logger object.
    *
-   * @param \Monolog\Logger $logger
+   * @param  LoggerInterface $logger
    * @return AbstractProvider
    */
   public function setLogger($logger) {
