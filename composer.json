@@ -21,6 +21,5 @@
     "psr-4": {
       "Tallanto\\Api\\": "src/"
     }
-  },
-  "prefer-stable": true
+  }
 }
