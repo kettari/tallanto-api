@@ -128,6 +128,7 @@ class Request {
     // Split headers and body
     list($head, $body) = explode("\r\n\r\n", $curl_result, 2);
     $headers = explode("\r\n", $head);
+    $this->response_headers = [];
     foreach ($headers as $header_item) {
       if (preg_match('/^([^:]+):\s?(.+)\s?$/i', $header_item, $matches) &&
         isset($matches[1]) && isset($matches[2])
