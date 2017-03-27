@@ -36,7 +36,6 @@ abstract class AbstractIntruder {
    */
   const SESSION_COOKIE_NAME = 'PHPSESSID';
 
-  protected $scheme = 'http://';
   protected $host;
   protected $endpoint = '/index.php';
   protected $user_name;
@@ -235,12 +234,24 @@ abstract class AbstractIntruder {
       $this->last_cookies = $this->getCookiesFromCurlResponse($this->last_content);
 
       // Add log message
-      $this->logger->debug('Executed cURL "{url}" with HTTP code {http_code}', [
-        'url'       => $url,
-        'http_code' => $this->last_http_code,
-        'headers'   => $this->last_headers,
-        'cookies'   => $this->last_cookies,
-      ]);
+      if (0 == $this->last_error_number) {
+        $this->logger->debug('Executed cURL "{url}" with HTTP code {http_code}', [
+          'url'              => $url,
+          'http_code'        => $this->last_http_code,
+          'headers'          => $this->last_headers,
+          'cookies'          => $this->last_cookies,
+        ]);
+      } else {
+        $this->logger->warning('Executed cURL "{url}" with cURL code {curl_err_num} "{curl_err_message}"',
+          [
+            'url'              => $url,
+            'http_code'        => $this->last_http_code,
+            'curl_err_num'     => $this->last_error_number,
+            'curl_err_message' => $this->last_error_message,
+            'headers'          => $this->last_headers,
+            'cookies'          => $this->last_cookies,
+          ]);
+      }
       if ($this->is_debug) {
         $this->logger->debug('cURL debug', [
           'verbose' => $debug,
@@ -426,7 +437,7 @@ abstract class AbstractIntruder {
    * @return string
    */
   protected function getUrl() {
-    return $this->scheme.$this->host.$this->endpoint;
+    return $this->host.$this->endpoint;
   }
 
   /**
