@@ -235,12 +235,13 @@ abstract class AbstractIntruder {
 
       // Add log message
       if (0 == $this->last_error_number) {
-        $this->logger->debug('Executed cURL "{url}" with HTTP code {http_code}', [
-          'url'              => $url,
-          'http_code'        => $this->last_http_code,
-          'headers'          => $this->last_headers,
-          'cookies'          => $this->last_cookies,
-        ]);
+        $this->logger->debug('Executed cURL "{url}" with HTTP code {http_code}',
+          [
+            'url'       => $url,
+            'http_code' => $this->last_http_code,
+            'headers'   => $this->last_headers,
+            'cookies'   => $this->last_cookies,
+          ]);
       } else {
         $this->logger->warning('Executed cURL "{url}" with cURL code {curl_err_num} "{curl_err_message}"',
           [
