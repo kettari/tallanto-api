@@ -16,7 +16,7 @@ abstract class AbstractEntity {
    *
    * @param array $data
    */
-  public function __construct($data) {
+  public function __construct($data = []) {
     foreach ($data as $key => $val) {
       if (property_exists($this, $key)) {
         $this->$key = $val;
