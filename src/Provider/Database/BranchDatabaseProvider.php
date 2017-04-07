@@ -45,8 +45,8 @@ class BranchDatabaseProvider extends AbstractDatabaseProvider {
    * @return string
    */
   protected function getSelectClause() {
-    return 'tl.value AS `key`,
-      tl.translate AS `value`';
+    return 'tl.value AS `name`,
+      tl.translate AS `title`';
   }
 
   /**

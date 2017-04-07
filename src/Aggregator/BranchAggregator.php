@@ -26,7 +26,7 @@ class BranchAggregator extends AbstractEntityAggregator {
     foreach ($result as $row) {
       /** @var Branch $branch */
       $branch = $this->buildObject($row);
-      if (!empty($branch->getKey())) {
+      if (!empty($branch->getName())) {
         $this->append($branch);
       }
     }
