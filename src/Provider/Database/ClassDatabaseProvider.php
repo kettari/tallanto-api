@@ -13,7 +13,8 @@ use PDO;
 use Tallanto\Api\ExpandableInterface;
 use Tallanto\Api\ExpandableTrait;
 
-class ClassDatabaseProvider extends AbstractDatabaseProvider implements ExpandableInterface {
+class ClassDatabaseProvider extends AbstractDatabaseProvider implements ExpandableInterface
+{
 
   use ExpandableTrait;
 
@@ -25,18 +26,21 @@ class ClassDatabaseProvider extends AbstractDatabaseProvider implements Expandab
    *
    * @return array
    */
-  function fetch() {
+  function fetch()
+  {
     $classes = parent::fetch();
 
     // Expand Classes
     if ($this->isExpand()) {
       // Expand Subject
       $subject_provider = new SubjectDatabaseProvider($this->connection);
-      $subject_provider->setQueryDisableLike(TRUE);
+      $subject_provider->setQueryDisableLike(true);
       // Expand Teachers
       $teacher_provider = new TeacherDatabaseProvider($this->connection);
-      $teacher_provider->setQueryDisableLike(TRUE);
-      $email_provider = (new UserEmailDatabaseProvider($this->connection))->setQueryDisableLike(TRUE);
+      $teacher_provider->setQueryDisableLike(true);
+      $email_provider = (new UserEmailDatabaseProvider(
+        $this->connection
+      ))->setQueryDisableLike(true);
       foreach ($classes as $key_class => $class) {
         // Subject
         $subject_provider->setQuery($class['subject_id']);
@@ -73,8 +77,10 @@ class ClassDatabaseProvider extends AbstractDatabaseProvider implements Expandab
    * @param string $limit_clause
    * @return string
    */
-  protected function getMainSql($select_clause, $where_clause, $limit_clause) {
-    return sprintf('
+  protected function getMainSql($select_clause, $where_clause, $limit_clause)
+  {
+    return sprintf(
+      '
       SELECT
         %s
     
@@ -82,7 +88,11 @@ class ClassDatabaseProvider extends AbstractDatabaseProvider implements Expandab
       
       WHERE mc.deleted = 0%s
       
-      %s', $select_clause, $where_clause, $limit_clause);
+      %s',
+      $select_clause,
+      $where_clause,
+      $limit_clause
+    );
   }
 
   /**
@@ -90,7 +100,8 @@ class ClassDatabaseProvider extends AbstractDatabaseProvider implements Expandab
    *
    * @return string
    */
-  protected function getSelectClause() {
+  protected function getSelectClause()
+  {
     return 'mc.id AS id,
         DATE_FORMAT(mc.date_entered, "%Y-%m-%dT%H:%i:%sZ") AS "date_created",
         DATE_FORMAT(mc.date_modified, "%Y-%m-%dT%H:%i:%sZ") AS "date_updated",
@@ -118,16 +129,34 @@ class ClassDatabaseProvider extends AbstractDatabaseProvider implements Expandab
    *
    * @return string
    */
-  protected function getWhereClause() {
+  protected function getWhereClause()
+  {
     // Format WHERE clause of the SQL statement
     $where_clause = '';
     if (!empty($this->query)) {
       $where_clause .= ' AND 
         (mc.id = :query_exact';
+
       if (!$this->isQueryDisableLike()) {
-        $where_clause .= ' OR
+
+        // Select date format to compare date
+        if (preg_match('/^\d{4}-\d{2}-\d{2}$/i', $this->getQuery())) {
+          $date_format = '%Y-%m-%d';
+        } elseif (preg_match(
+          '/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}Z$/i',
+          $this->getQuery()
+        )) {
+          $date_format = '%Y-%m-%dT%H:%iZ';
+        } else {
+          $date_format = '%Y-%m-%dT%H:%i:%sZ';
+        }
+
+        $where_clause .= sprintf(
+          ' OR
           mc.name LIKE :query_like OR 
-          DATE_FORMAT(mc.date_start, "%Y-%m-%dT%H:%i:%sZ") = :query_exact';
+          DATE_FORMAT(mc.date_start, "%s") = :query_exact',
+          $date_format
+        );
       }
       $where_clause .= ')';
     }
@@ -143,14 +172,24 @@ class ClassDatabaseProvider extends AbstractDatabaseProvider implements Expandab
    *
    * @return int
    */
-  function totalCount() {
-    $sql = $this->getMainSql('COUNT(DISTINCT mc.id)', $this->getWhereClause(),
-      '');
-    $stmt = $this->connection->executeQuery($sql, [
-      'query_like'     => '%'.$this->query.'%',
-      'query_exact'    => $this->query,
-      'modified_since' => !is_null($this->if_modified_since) ? $this->if_modified_since->format('Y-m-d H:i:s') : 0,
-    ], [PDO::PARAM_STR, PDO::PARAM_STR, PDO::PARAM_STR]);
+  function totalCount()
+  {
+    $sql = $this->getMainSql(
+      'COUNT(DISTINCT mc.id)',
+      $this->getWhereClause(),
+      ''
+    );
+    $stmt = $this->connection->executeQuery(
+      $sql,
+      [
+        'query_like'     => '%'.$this->query.'%',
+        'query_exact'    => $this->query,
+        'modified_since' => !is_null(
+          $this->if_modified_since
+        ) ? $this->if_modified_since->format('Y-m-d H:i:s') : 0,
+      ],
+      [PDO::PARAM_STR, PDO::PARAM_STR, PDO::PARAM_STR]
+    );
 
     // Fetch column, it contains records count
     return $stmt->fetchColumn();
