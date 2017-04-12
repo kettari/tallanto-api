@@ -28,21 +28,28 @@ class UserClassDatabaseProvider extends ClassDatabaseProvider
    */
   protected function getMainSql($select_clause, $where_clause, $limit_clause)
   {
+    // Workaround to get proper count()
+    if (false !== strpos($where_clause, 'COUNT(DISTINCT mc.id)')) {
+      $group_by = ' GROUP BY mc.id ';
+    } else {
+      $group_by = '';
+    }
+
     return sprintf(
       '
       SELECT
-        %s,
-        GROUP_CONCAT(mce.employee_id SEPARATOR \',\') AS \'teachers_hash\'
+        %s
     
       FROM most_class mc
       INNER JOIN most_class_employees_c mce ON mce.deleted = 0 AND mce.most_class_id = mc.id AND mce.employee_id = :parameter
       
       WHERE mc.deleted = 0%s
-      GROUP BY mc.id
+      %s
       
       %s',
       $select_clause,
       $where_clause,
+      $group_by,
       $limit_clause
     );
   }
