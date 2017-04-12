@@ -98,21 +98,28 @@ class ClassDatabaseProvider extends AbstractDatabaseProvider implements Expandab
    */
   protected function getMainSql($select_clause, $where_clause, $limit_clause)
   {
+    // Workaround to get proper count()
+    if (false !== strpos($where_clause, 'COUNT(DISTINCT mc.id)')) {
+      $group_by = ' GROUP BY mc.id ';
+    } else {
+      $group_by = '';
+    }
+
     return sprintf(
       '
       SELECT
-        %s,
-        GROUP_CONCAT(mce.employee_id SEPARATOR \',\') AS \'teachers_hash\'
+        %s
     
       FROM most_class mc
       LEFT JOIN most_class_employees_c mce ON mce.deleted = 0 AND mce.most_class_id = mc.id
       
       WHERE mc.deleted = 0%s
-      GROUP BY mc.id
+      %s
       
       %s',
       $select_clause,
       $where_clause,
+      $group_by,
       $limit_clause
     );
   }
@@ -143,7 +150,8 @@ class ClassDatabaseProvider extends AbstractDatabaseProvider implements Expandab
         mc.calendar_hidden,
         mc.parent_id,
         mc.filial AS branches,
-        mc.audience';
+        mc.audience,
+        GROUP_CONCAT(mce.employee_id SEPARATOR \',\') AS \'teachers_hash\'';
   }
 
   /**
@@ -159,26 +167,40 @@ class ClassDatabaseProvider extends AbstractDatabaseProvider implements Expandab
       $where_clause .= ' AND 
         (mc.id = :query_exact';
 
-      if (!$this->isQueryDisableLike()) {
+      // Select date format to compare date
+      if (preg_match('/^\d{4}-\d{2}-\d{2}$/i', $this->getQuery())) {
+        $date_format = '%Y-%m-%d';
+      } elseif (preg_match(
+        '/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}Z$/i',
+        $this->getQuery()
+      )) {
+        $date_format = '%Y-%m-%dT%H:%iZ';
+      } elseif (preg_match(
+        '/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}Z$/i',
+        $this->getQuery()
+      )) {
+        $date_format = '%Y-%m-%dT%H:%i:%sZ';
+      } else {
+        $date_format = false;
+      }
 
-        // Select date format to compare date
-        if (preg_match('/^\d{4}-\d{2}-\d{2}$/i', $this->getQuery())) {
-          $date_format = '%Y-%m-%d';
-        } elseif (preg_match(
-          '/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}Z$/i',
-          $this->getQuery()
-        )) {
-          $date_format = '%Y-%m-%dT%H:%iZ';
-        } else {
-          $date_format = '%Y-%m-%dT%H:%i:%sZ';
-        }
+      // If query is a date, then look in date fields only
+      if (false !== $date_format) {
 
         $where_clause .= sprintf(
-          ' OR
-          mc.name LIKE :query_like OR 
-          DATE_FORMAT(mc.date_start, "%s") = :query_exact',
+          ' OR DATE_FORMAT(mc.date_start, "%s") = :query_exact',
           $date_format
         );
+
+      } else {
+
+        if (!$this->isQueryDisableLike()) {
+          $where_clause .= sprintf(
+            ' OR mc.name LIKE :query_like',
+            $date_format
+          );
+        }
+
       }
       $where_clause .= ')';
     }
@@ -204,13 +226,19 @@ class ClassDatabaseProvider extends AbstractDatabaseProvider implements Expandab
     $stmt = $this->connection->executeQuery(
       $sql,
       [
+        'parameter'      => $this->parameter,
         'query_like'     => '%'.$this->query.'%',
         'query_exact'    => $this->query,
         'modified_since' => !is_null(
           $this->if_modified_since
         ) ? $this->if_modified_since->format('Y-m-d H:i:s') : 0,
       ],
-      [PDO::PARAM_STR, PDO::PARAM_STR, PDO::PARAM_STR]
+      [
+        PDO::PARAM_STR,
+        PDO::PARAM_STR,
+        PDO::PARAM_STR,
+        PDO::PARAM_STR,
+      ]
     );
 
     // Fetch column, it contains records count

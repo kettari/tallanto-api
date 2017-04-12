@@ -175,14 +175,37 @@ class TicketDatabaseProvider extends AbstractDatabaseProvider implements Expanda
     $where_clause = '';
     if (!empty($this->query)) {
 
-      // If query is a date, then look in date fields only
-      if (preg_match('/\d{2}\.\d{2}\.\d{4}/', $this->query)) {
+      // Select date format to compare date
+      if (preg_match('/^\d{4}-\d{2}-\d{2}$/i', $this->getQuery())) {
+        $date_format = '%Y-%m-%d';
+      } elseif (preg_match(
+        '/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}Z$/i',
+        $this->getQuery()
+      )) {
+        $date_format = '%Y-%m-%dT%H:%iZ';
+      } elseif (preg_match(
+        '/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}Z$/i',
+        $this->getQuery()
+      )) {
+        $date_format = '%Y-%m-%dT%H:%i:%sZ';
+      } else {
+        $date_format = false;
+      }
 
-        $where_clause .= ' AND 
-        ( DATE_FORMAT(a.date_entered, "%d.%m.%Y") = :query_exact OR
-          DATE_FORMAT(a.date_modified, "%d.%m.%Y") = :query_exact OR
-          DATE_FORMAT(a.start_date, "%d.%m.%Y") = :query_exact OR
-          DATE_FORMAT(a.finish_date, "%d.%m.%Y") = :query_exact )';
+      // If query is a date, then look in date fields only
+      if (false !== $date_format) {
+
+        $where_clause .= sprintf(
+          ' AND 
+        ( DATE_FORMAT(a.date_entered, "%s") = :query_exact OR
+          DATE_FORMAT(a.date_modified, "%s") = :query_exact OR
+          DATE_FORMAT(a.start_date, "%s") = :query_exact OR
+          DATE_FORMAT(a.finish_date, "%s") = :query_exact )',
+          $date_format,
+          $date_format,
+          $date_format,
+          $date_format
+        );
 
       } else {
         // Query is not date
