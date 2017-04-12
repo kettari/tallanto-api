@@ -12,7 +12,8 @@ namespace Tallanto\Api\Provider;
 use DateTime;
 use Psr\Log\LoggerInterface;
 
-class AbstractProvider {
+class AbstractProvider
+{
 
   /**
    * @var  LoggerInterface
@@ -35,6 +36,11 @@ class AbstractProvider {
   protected $query;
 
   /**
+   * @var string
+   */
+  protected $parameter;
+
+  /**
    * @var \DateTime
    */
   protected $if_modified_since;
@@ -45,15 +51,18 @@ class AbstractProvider {
    * @param  LoggerInterface $logger
    * @return AbstractProvider
    */
-  public function setLogger($logger) {
+  public function setLogger($logger)
+  {
     $this->logger = $logger;
+
     return $this;
   }
 
   /**
    * @inheritdoc
    */
-  public function getPageNumber() {
+  public function getPageNumber()
+  {
     return $this->page_number;
   }
 
@@ -61,15 +70,18 @@ class AbstractProvider {
    * @inheritdoc
    * @return AbstractProvider
    */
-  public function setPageNumber($page) {
+  public function setPageNumber($page)
+  {
     $this->page_number = $page;
+
     return $this;
   }
 
   /**
    * @inheritdoc
    */
-  public function getPageSize() {
+  public function getPageSize()
+  {
     return $this->page_size;
   }
 
@@ -77,15 +89,18 @@ class AbstractProvider {
    * @inheritdoc
    * @return AbstractProvider
    */
-  public function setPageSize($size) {
+  public function setPageSize($size)
+  {
     $this->page_size = $size;
+
     return $this;
   }
 
   /**
    * @inheritdoc
    */
-  public function getQuery() {
+  public function getQuery()
+  {
     return $this->query;
   }
 
@@ -93,16 +108,37 @@ class AbstractProvider {
    * @inheritdoc
    * @return AbstractProvider
    */
-  public function setQuery($query) {
+  public function setQuery($query)
+  {
     $this->query = $query;
+
     return $this;
   }
 
+  /**
+   * @return string
+   */
+  public function getParameter()
+  {
+    return $this->parameter;
+  }
+
+  /**
+   * @param string $parameter
+   * @return AbstractProvider
+   */
+  public function setParameter(string $parameter)
+  {
+    $this->parameter = $parameter;
+
+    return $this;
+  }
 
   /**
    * @return DateTime
    */
-  public function getIfModifiedSince() {
+  public function getIfModifiedSince()
+  {
     return $this->if_modified_since;
   }
 
@@ -110,10 +146,11 @@ class AbstractProvider {
    * @param DateTime $if_modified_since
    * @return AbstractProvider
    */
-  public function setIfModifiedSince($if_modified_since) {
+  public function setIfModifiedSince($if_modified_since)
+  {
     $this->if_modified_since = $if_modified_since;
 
     return $this;
   }
-  
+
 }

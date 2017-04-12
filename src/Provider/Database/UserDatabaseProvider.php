@@ -13,7 +13,8 @@ use PDO;
 use Tallanto\Api\ExpandableInterface;
 use Tallanto\Api\ExpandableTrait;
 
-class UserDatabaseProvider extends AbstractDatabaseProvider implements ExpandableInterface {
+class UserDatabaseProvider extends AbstractDatabaseProvider implements ExpandableInterface
+{
 
   use ExpandableTrait;
 
@@ -25,15 +26,27 @@ class UserDatabaseProvider extends AbstractDatabaseProvider implements Expandabl
    *
    * @return array
    */
-  function fetch() {
+  function fetch()
+  {
     $users = parent::fetch();
 
     // Expand Users with emails
     if ($this->isExpand()) {
+
+      // Local copies
+      $local_copy = $this->getLocalCopy();
+
       $email_provider = new UserEmailDatabaseProvider($this->connection);
       foreach ($users as $key => $item) {
-        $email_provider->setQuery($item['id']);
-        $users[$key]['emails'] = $email_provider->fetch();
+        if (is_null($local_copy->getCache('emails', $item['id']))) {
+          $email_provider->setQuery($item['id']);
+          $local_copy->setCache(
+            'emails',
+            $item['id'],
+            $email_provider->fetch()
+          );
+        }
+        $users[$key]['emails'] = $local_copy->getCache('emails', $item['id']);
       }
     }
 
@@ -52,8 +65,10 @@ class UserDatabaseProvider extends AbstractDatabaseProvider implements Expandabl
    * @param string $limit_clause
    * @return string
    */
-  protected function getMainSql($select_clause, $where_clause, $limit_clause) {
-    return sprintf('
+  protected function getMainSql($select_clause, $where_clause, $limit_clause)
+  {
+    return sprintf(
+      '
       SELECT
         %s
     
@@ -62,7 +77,11 @@ class UserDatabaseProvider extends AbstractDatabaseProvider implements Expandabl
       WHERE u.deleted = 0%s
       ORDER BY u.last_name, u.first_name
       
-      %s', $select_clause, $where_clause, $limit_clause);
+      %s',
+      $select_clause,
+      $where_clause,
+      $limit_clause
+    );
   }
 
   /**
@@ -70,7 +89,8 @@ class UserDatabaseProvider extends AbstractDatabaseProvider implements Expandabl
    *
    * @return string
    */
-  protected function getSelectClause() {
+  protected function getSelectClause()
+  {
     return 'u.id AS id,
         u.user_name,
         u.first_name,
@@ -90,7 +110,8 @@ class UserDatabaseProvider extends AbstractDatabaseProvider implements Expandabl
    *
    * @return string
    */
-  protected function getWhereClause() {
+  protected function getWhereClause()
+  {
     // Format WHERE clause of the SQL statement
     $where_clause = '';
     if (!empty($this->query)) {
@@ -116,13 +137,21 @@ class UserDatabaseProvider extends AbstractDatabaseProvider implements Expandabl
    *
    * @return int
    */
-  function totalCount() {
-    $sql = $this->getMainSql('COUNT(DISTINCT u.id)', $this->getWhereClause(),
-      '');
-    $stmt = $this->connection->executeQuery($sql, [
-      'query_like'  => '%'.$this->query.'%',
-      'query_exact' => $this->query,
-    ], [PDO::PARAM_STR]);
+  function totalCount()
+  {
+    $sql = $this->getMainSql(
+      'COUNT(DISTINCT u.id)',
+      $this->getWhereClause(),
+      ''
+    );
+    $stmt = $this->connection->executeQuery(
+      $sql,
+      [
+        'query_like' => '%'.$this->query.'%',
+        'query_exact' => $this->query,
+      ],
+      [PDO::PARAM_STR]
+    );
 
     // Fetch column, it contains records count
     return $stmt->fetchColumn();

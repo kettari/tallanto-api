@@ -14,7 +14,8 @@ use PDO;
 use Tallanto\Api\Provider\AbstractProvider;
 use Tallanto\Api\Provider\ProviderInterface;
 
-abstract class AbstractDatabaseProvider extends AbstractProvider implements ProviderInterface {
+abstract class AbstractDatabaseProvider extends AbstractProvider implements ProviderInterface
+{
 
   /**
    * @var Connection
@@ -24,15 +25,22 @@ abstract class AbstractDatabaseProvider extends AbstractProvider implements Prov
   /**
    * @var bool
    */
-  protected $query_disable_like = FALSE;
+  protected $query_disable_like = false;
+
+  /**
+   * @var LocalCopySingleton
+   */
+  private $local_copy;
 
   /**
    * AbstractDatabaseProvider constructor.
    *
    * @param \Doctrine\DBAL\Connection $connection
    */
-  public function __construct(Connection $connection) {
+  public function __construct(Connection $connection)
+  {
     $this->connection = $connection;
+    $this->local_copy = LocalCopySingleton::getInstance();
   }
 
   /**
@@ -43,19 +51,31 @@ abstract class AbstractDatabaseProvider extends AbstractProvider implements Prov
    *
    * @return array
    */
-  function fetch() {
+  function fetch()
+  {
     $offset = ($this->getPageNumber() - 1) * $this->getPageSize();
-    $sql = $this->getMainSql($this->getSelectClause(), $this->getWhereClause(),
-      $this->getLimitClause($offset, $this->getPageSize()));
-    $stmt = $this->connection->executeQuery($sql, [
-      'query_like'     => '%'.$this->query.'%',
-      'query_exact'    => $this->query,
-      'modified_since' => !is_null($this->if_modified_since) ? $this->if_modified_since->format('Y-m-d H:i:s') : 0,
-    ], [
-      PDO::PARAM_STR,
-      PDO::PARAM_STR,
-      PDO::PARAM_STR,
-    ]);
+    $sql = $this->getMainSql(
+      $this->getSelectClause(),
+      $this->getWhereClause(),
+      $this->getLimitClause($offset, $this->getPageSize())
+    );
+    $stmt = $this->connection->executeQuery(
+      $sql,
+      [
+        'parameter'      => $this->parameter,
+        'query_like'     => '%'.$this->query.'%',
+        'query_exact'    => $this->query,
+        'modified_since' => !is_null(
+          $this->if_modified_since
+        ) ? $this->if_modified_since->format('Y-m-d H:i:s') : 0,
+      ],
+      [
+        PDO::PARAM_STR,
+        PDO::PARAM_STR,
+        PDO::PARAM_STR,
+        PDO::PARAM_STR,
+      ]
+    );
 
     // Fetch all results into associative array
     return $stmt->fetchAll(PDO::FETCH_ASSOC);
@@ -70,7 +90,8 @@ abstract class AbstractDatabaseProvider extends AbstractProvider implements Prov
    * @return array
    * @throws \Exception
    */
-  public function fetchAll(callable $callback = NULL) {
+  public function fetchAll(callable $callback = null)
+  {
     throw new \Exception('Database provider does not allow fetchAll() method.');
   }
 
@@ -86,7 +107,11 @@ abstract class AbstractDatabaseProvider extends AbstractProvider implements Prov
    * @param string $limit_clause
    * @return string
    */
-  abstract protected function getMainSql($select_clause, $where_clause, $limit_clause);
+  abstract protected function getMainSql(
+    $select_clause,
+    $where_clause,
+    $limit_clause
+  );
 
   /**
    * Prepares SELECT SQL clause.
@@ -109,7 +134,8 @@ abstract class AbstractDatabaseProvider extends AbstractProvider implements Prov
    * @param integer $items_limit
    * @return string
    */
-  protected function getLimitClause($items_offset, $items_limit) {
+  protected function getLimitClause($items_offset, $items_limit)
+  {
     return sprintf('LIMIT %d, %d', $items_offset, $items_limit);
   }
 
@@ -125,7 +151,8 @@ abstract class AbstractDatabaseProvider extends AbstractProvider implements Prov
    *
    * @return bool
    */
-  public function isQueryDisableLike() {
+  public function isQueryDisableLike()
+  {
     return $this->query_disable_like;
   }
 
@@ -135,10 +162,19 @@ abstract class AbstractDatabaseProvider extends AbstractProvider implements Prov
    * @param bool $query_disable_like
    * @return AbstractDatabaseProvider
    */
-  public function setQueryDisableLike($query_disable_like) {
+  public function setQueryDisableLike($query_disable_like)
+  {
     $this->query_disable_like = $query_disable_like;
 
     return $this;
+  }
+
+  /**
+   * @return LocalCopySingleton
+   */
+  public function getLocalCopy()
+  {
+    return $this->local_copy;
   }
 
 }

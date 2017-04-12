@@ -39,6 +39,8 @@ class Factory {
         return new ClassVisitDatabaseProvider($connection);
       case 'UserAggregator':
         return new UserDatabaseProvider($connection);
+      case 'UserClassAggregator':
+        return new UserClassDatabaseProvider($connection);
       case 'ClassAggregator':
         return new ClassDatabaseProvider($connection);
       case 'SubjectAggregator':

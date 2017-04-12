@@ -13,7 +13,8 @@ use PDO;
 use Tallanto\Api\ExpandableInterface;
 use Tallanto\Api\ExpandableTrait;
 
-class ContactDatabaseProvider extends AbstractDatabaseProvider implements ExpandableInterface {
+class ContactDatabaseProvider extends AbstractDatabaseProvider implements ExpandableInterface
+{
 
   use ExpandableTrait;
 
@@ -25,25 +26,54 @@ class ContactDatabaseProvider extends AbstractDatabaseProvider implements Expand
    *
    * @return array
    */
-  function fetch() {
+  function fetch()
+  {
     $contacts = parent::fetch();
 
     // Expand Contacts
     if ($this->isExpand()) {
       $user_provider = new UserDatabaseProvider($this->connection);
-      $user_provider->setQueryDisableLike(TRUE);
+      $user_provider->setQueryDisableLike(true);
       // Set Expand recursively
-      $user_provider->setExpand(TRUE);
-      $email_provider = (new ContactEmailDatabaseProvider($this->connection))->setQueryDisableLike(TRUE);
+      $user_provider->setExpand(true);
+      $email_provider = (new ContactEmailDatabaseProvider(
+        $this->connection
+      ))->setQueryDisableLike(true);
+
+      // Local copies
+      $local_copy = $this->getLocalCopy();
+
       foreach ($contacts as $key => $item) {
         // Manager
-        $user_provider->setQuery($item['manager_id']);
-        if ($manager = $user_provider->fetch()) {
-          $contacts[$key]['manager'] = reset($manager);
+        if (is_null($local_copy->getCache('users', $item['manager_id'])) &&
+          !is_null($item['manager_id'])
+        ) {
+          $user_provider->setQuery($item['manager_id']);
+          if ($manager = $user_provider->fetch()) {
+            $local_copy->setCache(
+              'users',
+              $item['manager_id'],
+              reset($manager)
+            );
+          }
         }
+        $contacts[$key]['manager'] = $local_copy->getCache(
+          'users',
+          $item['manager_id']
+        );
         // Email
-        $email_provider->setQuery($item['id']);
-        $contacts[$key]['emails'] = $email_provider->fetch();
+        if (is_null($local_copy->getCache('emails', $item['id']))) {
+          $email_provider->setQuery($item['id']);
+          $local_copy->setCache(
+            'emails',
+            $item['id'],
+            $email_provider->fetch()
+          );
+        }
+        $contacts[$key]['emails'] = $local_copy->getCache(
+          'emails',
+          $item['id']
+        );
       }
     }
 
@@ -63,8 +93,10 @@ class ContactDatabaseProvider extends AbstractDatabaseProvider implements Expand
    * @param string $limit_clause
    * @return string
    */
-  protected function getMainSql($select_clause, $where_clause, $limit_clause) {
-    return sprintf('
+  protected function getMainSql($select_clause, $where_clause, $limit_clause)
+  {
+    return sprintf(
+      '
       SELECT
         %s
     
@@ -75,7 +107,11 @@ class ContactDatabaseProvider extends AbstractDatabaseProvider implements Expand
       WHERE c.deleted = 0%s
       ORDER BY c.last_name, c.first_name
       
-      %s', $select_clause, $where_clause, $limit_clause);
+      %s',
+      $select_clause,
+      $where_clause,
+      $limit_clause
+    );
   }
 
   /**
@@ -83,7 +119,8 @@ class ContactDatabaseProvider extends AbstractDatabaseProvider implements Expand
    *
    * @return string
    */
-  protected function getSelectClause() {
+  protected function getSelectClause()
+  {
     return 'c.id AS id,
         c.first_name,
         c.last_name,
@@ -102,7 +139,8 @@ class ContactDatabaseProvider extends AbstractDatabaseProvider implements Expand
    *
    * @return string
    */
-  protected function getWhereClause() {
+  protected function getWhereClause()
+  {
     // Format WHERE clause of the SQL statement
     $where_clause = '';
     if (!empty($this->query)) {
@@ -129,14 +167,24 @@ class ContactDatabaseProvider extends AbstractDatabaseProvider implements Expand
    *
    * @return int
    */
-  function totalCount() {
-    $sql = $this->getMainSql('COUNT(DISTINCT c.id)', $this->getWhereClause(),
-      '');
-    $stmt = $this->connection->executeQuery($sql, [
-      'query_like'     => '%'.$this->query.'%',
-      'query_exact'    => $this->query,
-      'modified_since' => !is_null($this->if_modified_since) ? $this->if_modified_since->format('Y-m-d H:i:s') : 0,
-    ], [PDO::PARAM_STR, PDO::PARAM_STR, PDO::PARAM_STR]);
+  function totalCount()
+  {
+    $sql = $this->getMainSql(
+      'COUNT(DISTINCT c.id)',
+      $this->getWhereClause(),
+      ''
+    );
+    $stmt = $this->connection->executeQuery(
+      $sql,
+      [
+        'query_like'     => '%'.$this->query.'%',
+        'query_exact'    => $this->query,
+        'modified_since' => !is_null(
+          $this->if_modified_since
+        ) ? $this->if_modified_since->format('Y-m-d H:i:s') : 0,
+      ],
+      [PDO::PARAM_STR, PDO::PARAM_STR, PDO::PARAM_STR]
+    );
 
     // Fetch column, it contains records count
     return $stmt->fetchColumn();

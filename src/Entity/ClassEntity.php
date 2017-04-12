@@ -107,6 +107,11 @@ class ClassEntity extends AbstractIdentifiableEntity implements ExpandableInterf
   protected $teachers;
 
   /**
+   * @var string
+   */
+  protected $teachers_hash;
+
+  /**
    * ClassEntity constructor.
    *
    * @param array $data
@@ -480,6 +485,25 @@ class ClassEntity extends AbstractIdentifiableEntity implements ExpandableInterf
     }
 
     return count($audiences) ? reset($audiences) : '';
+  }
+
+  /**
+   * @return string
+   */
+  public function getTeachersHash()
+  {
+    return $this->teachers_hash;
+  }
+
+  /**
+   * @param string $teachers_hash
+   * @return ClassEntity
+   */
+  public function setTeachersHash($teachers_hash)
+  {
+    $this->teachers_hash = $teachers_hash;
+
+    return $this;
   }
 
 }

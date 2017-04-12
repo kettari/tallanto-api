@@ -83,4 +83,15 @@ interface ProviderInterface {
    */
   public function setQuery($query);
 
+  /**
+   * @return string
+   */
+  public function getParameter();
+
+  /**
+   * @param string $parameter
+   * @return ProviderInterface
+   */
+  public function setParameter(string $parameter);
+
 }

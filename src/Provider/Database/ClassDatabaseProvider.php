@@ -38,26 +38,45 @@ class ClassDatabaseProvider extends AbstractDatabaseProvider implements Expandab
       // Expand Teachers
       $teacher_provider = new TeacherDatabaseProvider($this->connection);
       $teacher_provider->setQueryDisableLike(true);
-      $email_provider = (new UserEmailDatabaseProvider(
-        $this->connection
-      ))->setQueryDisableLike(true);
+
+      // Local copies
+      $local_copy = $this->getLocalCopy();
+
       foreach ($classes as $key_class => $class) {
         // Subject
-        $subject_provider->setQuery($class['subject_id']);
-        $subjects = $subject_provider->fetch();
-        $classes[$key_class]['subject'] = reset($subjects);
-        // Teacher
-        $teacher_provider->setQuery($class['id']);
-        if ($teachers = $teacher_provider->fetch()) {
-          $classes[$key_class]['teachers'] = [];
-          foreach ($teachers as $key_teacher => $teacher) {
-            // Email
-            $email_provider->setQuery($teacher['id']);
-            $teacher['emails'] = $email_provider->fetch();
-            // Assign result to the root array
-            $classes[$key_class]['teachers'][] = $teacher;
-          }
+        if (is_null(
+            $local_copy->getCache('subjects', $class['subject_id'])
+          ) && !is_null($class['subject_id'])
+        ) {
+          $subject_provider->setQuery($class['subject_id']);
+          $subjects = $subject_provider->fetch();
+          /** @var \Tallanto\Api\Entity\Subject $subject_item */
+          $subject_item = reset($subjects);
+          $local_copy->setCache(
+            'subjects',
+            $class['subject_id'],
+            $subject_item
+          );
         }
+        $classes[$key_class]['subject'] = $local_copy->getCache(
+          'subjects',
+          $class['subject_id']
+        );
+        // Teacher
+        if (is_null($local_copy->getCache('users', $class['teachers_hash'])) &&
+          !is_null($class['teachers_hash'])
+        ) {
+          $teacher_provider->setQuery($class['id']);
+          $local_copy->setCache(
+            'users',
+            $class['teachers_hash'],
+            $teacher_provider->fetch()
+          );
+        }
+        $classes[$key_class]['teachers'] = $local_copy->getCache(
+          'users',
+          $class['teachers_hash']
+        );
       }
     }
 
@@ -82,11 +101,14 @@ class ClassDatabaseProvider extends AbstractDatabaseProvider implements Expandab
     return sprintf(
       '
       SELECT
-        %s
+        %s,
+        GROUP_CONCAT(mce.employee_id SEPARATOR \',\') AS \'teachers_hash\'
     
       FROM most_class mc
+      LEFT JOIN most_class_employees_c mce ON mce.deleted = 0 AND mce.most_class_id = mc.id
       
       WHERE mc.deleted = 0%s
+      GROUP BY mc.id
       
       %s',
       $select_clause,

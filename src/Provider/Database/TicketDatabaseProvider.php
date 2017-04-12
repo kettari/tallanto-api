@@ -13,7 +13,8 @@ use PDO;
 use Tallanto\Api\ExpandableInterface;
 use Tallanto\Api\ExpandableTrait;
 
-class TicketDatabaseProvider extends AbstractDatabaseProvider implements ExpandableInterface {
+class TicketDatabaseProvider extends AbstractDatabaseProvider implements ExpandableInterface
+{
 
   use ExpandableTrait;
 
@@ -25,40 +26,79 @@ class TicketDatabaseProvider extends AbstractDatabaseProvider implements Expanda
    *
    * @return array
    */
-  function fetch() {
+  function fetch()
+  {
     $tickets = parent::fetch();
 
     // Expand Tickets
     if ($this->isExpand()) {
       // Template
       $template_provider = new TemplateDatabaseProvider($this->connection);
-      $template_provider->setQueryDisableLike(TRUE);
+      $template_provider->setQueryDisableLike(true);
       // Contact
       $contact_provider = new ContactDatabaseProvider($this->connection);
       // Set Expand recursively
-      $contact_provider->setExpand(TRUE)
-        ->setQueryDisableLike(TRUE);
+      $contact_provider->setExpand(true)
+        ->setQueryDisableLike(true);
       // User
       $user_provider = new UserDatabaseProvider($this->connection);
-      $user_provider->setQueryDisableLike(TRUE);
+      $user_provider->setQueryDisableLike(true);
       // Set Expand recursively
-      $user_provider->setExpand(TRUE);
+      $user_provider->setExpand(true);
+
+      // Local copies
+      $local_copy = $this->getLocalCopy();
+
       foreach ($tickets as $key => $item) {
         // Template
-        $template_provider->setQuery($item['template_id']);
-        if ($template = $template_provider->fetch()) {
-          $tickets[$key]['template'] = reset($template);
+        if (is_null($local_copy->getCache('templates', $item['template_id'])) &&
+          !is_null($item['template_id'])
+        ) {
+          $template_provider->setQuery($item['template_id']);
+          if ($template = $template_provider->fetch()) {
+            $local_copy->setCache(
+              'templates',
+              $item['template_id'],
+              reset($template)
+            );
+          }
         }
+        $tickets[$key]['template'] = $local_copy->getCache(
+          'templates',
+          $item['template_id']
+        );
         // Contact
-        $contact_provider->setQuery($item['contact_id']);
-        if ($contact = $contact_provider->fetch()) {
-          $tickets[$key]['contact'] = reset($contact);
+        if (is_null($local_copy->getCache('contacts', $item['contact_id'])) &&
+          !is_null($item['contact_id'])
+        ) {
+          $contact_provider->setQuery($item['contact_id']);
+          if ($contact = $contact_provider->fetch()) {
+            $local_copy->setCache(
+              'contacts',
+              $item['contact_id'],
+              reset($contact)
+            );
+          }
         }
+        $tickets[$key]['contact'] = $local_copy->getCache(
+          'contacts',
+          $item['contact_id']
+        );
         // Manager
-        $user_provider->setQuery($item['manager_id']);
-        if ($manager = $user_provider->fetch()) {
-          $tickets[$key]['manager'] = reset($manager);
+        if (is_null($local_copy->getCache('users', $item['manager_id']))) {
+          $user_provider->setQuery($item['manager_id']);
+          if ($manager = $user_provider->fetch()) {
+            $local_copy->setCache(
+              'users',
+              $item['manager_id'],
+              reset($manager)
+            );
+          }
         }
+        $tickets[$key]['manager'] = $local_copy->getCache(
+          'users',
+          $item['manager_id']
+        );
       }
     }
 
@@ -77,8 +117,10 @@ class TicketDatabaseProvider extends AbstractDatabaseProvider implements Expanda
    * @param string $limit_clause
    * @return string
    */
-  protected function getMainSql($select_clause, $where_clause, $limit_clause) {
-    return sprintf('
+  protected function getMainSql($select_clause, $where_clause, $limit_clause)
+  {
+    return sprintf(
+      '
       SELECT
         %s
     
@@ -89,7 +131,11 @@ class TicketDatabaseProvider extends AbstractDatabaseProvider implements Expanda
       WHERE a.deleted = 0%s
       ORDER BY a.name, a.finish_date
       
-      %s', $select_clause, $where_clause, $limit_clause);
+      %s',
+      $select_clause,
+      $where_clause,
+      $limit_clause
+    );
   }
 
   /**
@@ -97,7 +143,8 @@ class TicketDatabaseProvider extends AbstractDatabaseProvider implements Expanda
    *
    * @return string
    */
-  protected function getSelectClause() {
+  protected function getSelectClause()
+  {
     return 'a.id AS id,
         DATE_FORMAT(a.date_entered, "%Y-%m-%dT%H:%i:%sZ") AS "date_created",
         DATE_FORMAT(a.date_modified, "%Y-%m-%dT%H:%i:%sZ") AS "date_updated",
@@ -122,7 +169,8 @@ class TicketDatabaseProvider extends AbstractDatabaseProvider implements Expanda
    *
    * @return string
    */
-  protected function getWhereClause() {
+  protected function getWhereClause()
+  {
     // Format WHERE clause of the SQL statement
     $where_clause = '';
     if (!empty($this->query)) {
@@ -161,14 +209,24 @@ class TicketDatabaseProvider extends AbstractDatabaseProvider implements Expanda
    *
    * @return int
    */
-  function totalCount() {
-    $sql = $this->getMainSql('COUNT(DISTINCT a.id)', $this->getWhereClause(),
-      '');
-    $stmt = $this->connection->executeQuery($sql, [
-      'query_like'     => '%'.$this->query.'%',
-      'query_exact'    => $this->query,
-      'modified_since' => !is_null($this->if_modified_since) ? $this->if_modified_since->format('Y-m-d H:i:s') : 0,
-    ], [PDO::PARAM_STR, PDO::PARAM_STR, PDO::PARAM_STR]);
+  function totalCount()
+  {
+    $sql = $this->getMainSql(
+      'COUNT(DISTINCT a.id)',
+      $this->getWhereClause(),
+      ''
+    );
+    $stmt = $this->connection->executeQuery(
+      $sql,
+      [
+        'query_like'     => '%'.$this->query.'%',
+        'query_exact'    => $this->query,
+        'modified_since' => !is_null(
+          $this->if_modified_since
+        ) ? $this->if_modified_since->format('Y-m-d H:i:s') : 0,
+      ],
+      [PDO::PARAM_STR, PDO::PARAM_STR, PDO::PARAM_STR]
+    );
 
     // Fetch column, it contains records count
     return $stmt->fetchColumn();
