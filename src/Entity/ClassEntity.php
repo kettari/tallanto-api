@@ -484,7 +484,7 @@ class ClassEntity extends AbstractIdentifiableEntity implements ExpandableInterf
       }
     }
 
-    return count($audiences) ? reset($audiences) : '';
+    return count($audiences) ? reset($audiences) : $audience;
   }
 
   /**
