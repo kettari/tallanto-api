@@ -29,7 +29,7 @@ class UserClassDatabaseProvider extends ClassDatabaseProvider
   protected function getMainSql($select_clause, $where_clause, $limit_clause)
   {
     // Workaround to get proper count()
-    if (false !== strpos($where_clause, 'COUNT(DISTINCT mc.id)')) {
+    if (false === strpos($select_clause, 'COUNT(DISTINCT mc.id)')) {
       $group_by = ' GROUP BY mc.id ';
     } else {
       $group_by = '';
