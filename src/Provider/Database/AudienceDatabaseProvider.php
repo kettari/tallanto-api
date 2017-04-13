@@ -33,7 +33,7 @@ class AudienceDatabaseProvider extends AbstractDatabaseProvider {
     
       FROM translated_lists_for_report tl
       
-      WHERE tl.list_name="audience_list"%s
+      WHERE tl.list_name="audience_list" AND tl.value IS NOT NULL AND tl.value <> \'\'%s
       ORDER BY tl.translate
       
       %s', $select_clause, $where_clause, $limit_clause);
@@ -45,8 +45,8 @@ class AudienceDatabaseProvider extends AbstractDatabaseProvider {
    * @return string
    */
   protected function getSelectClause() {
-    return 'tl.value AS `key`,
-      tl.translate AS `value`';
+    return 'tl.value AS `name`,
+      tl.translate AS `title`';
   }
 
   /**

@@ -15,24 +15,6 @@ use Tallanto\Api\Entity\Branch;
 class BranchAggregator extends AbstractEntityAggregator {
 
   /**
-   * Parse array received from the provider and create objects.
-   *
-   * @param array $result
-   */
-  protected function parseResult($result) {
-    // Clear items
-    $this->clear();
-    // Iterate rows and create objects
-    foreach ($result as $row) {
-      /** @var Branch $branch */
-      $branch = $this->buildObject($row);
-      if (!empty($branch->getName())) {
-        $this->append($branch);
-      }
-    }
-  }
-
-  /**
    * Add (create) entity to the storage. Copy of the object
    * is added to this aggregator's internal storage.
    *

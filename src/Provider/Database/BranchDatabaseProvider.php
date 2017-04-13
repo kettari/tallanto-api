@@ -33,7 +33,7 @@ class BranchDatabaseProvider extends AbstractDatabaseProvider {
     
       FROM translated_lists_for_report tl
       
-      WHERE tl.list_name="filial_list"%s
+      WHERE tl.list_name="filial_list" AND tl.value IS NOT NULL AND tl.value <> \'\'%s
       ORDER BY tl.translate
       
       %s', $select_clause, $where_clause, $limit_clause);

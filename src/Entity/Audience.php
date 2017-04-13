@@ -14,26 +14,26 @@ class Audience extends AbstractEntity {
   /**
    * @var string
    */
-  protected $key;
+  protected $name;
 
   /**
    * @var string
    */
-  protected $value;
+  protected $title;
 
   /**
    * @return string
    */
-  public function getKey() {
-    return $this->key;
+  public function getName() {
+    return $this->name;
   }
 
   /**
-   * @param string $key
+   * @param string $name
    * @return Audience
    */
-  public function setKey($key) {
-    $this->key = $key;
+  public function setName($name) {
+    $this->name = $name;
 
     return $this;
   }
@@ -41,16 +41,16 @@ class Audience extends AbstractEntity {
   /**
    * @return string
    */
-  public function getValue() {
-    return $this->value;
+  public function getTitle() {
+    return $this->title;
   }
 
   /**
-   * @param string $value
+   * @param string $title
    * @return Audience
    */
-  public function setValue($value) {
-    $this->value = $value;
+  public function setTitle($title) {
+    $this->title = $title;
 
     return $this;
   }
