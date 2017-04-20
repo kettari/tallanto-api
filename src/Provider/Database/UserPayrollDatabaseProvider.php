@@ -124,8 +124,7 @@ class UserPayrollDatabaseProvider extends AbstractDatabaseProvider implements Ex
     $where_clause = '';
     if (!empty($this->query)) {
       $where_clause .= ' AND 
-        (p.id = :query_exact OR
-        p.employee_id = :parameter';
+        (p.id = :query_exact';
 
       // Select date format to compare date
       if (preg_match('/^\d{4}-\d{2}-\d{2}$/i', $this->getQuery())) {
@@ -162,6 +161,10 @@ class UserPayrollDatabaseProvider extends AbstractDatabaseProvider implements Ex
 
       }
       $where_clause .= ')';
+    }
+
+    if (!empty($this->getParameter())) {
+      $where_clause .= ' AND p.employee_id = :parameter';
     }
 
     return $where_clause;
