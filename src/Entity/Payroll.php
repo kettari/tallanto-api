@@ -34,6 +34,11 @@ class Payroll extends AbstractIdentifiableEntity  implements ExpandableInterface
   /**
    * @var string
    */
+  protected $direction;
+
+  /**
+   * @var string
+   */
   protected $date_payment;
 
   /**
@@ -126,6 +131,25 @@ class Payroll extends AbstractIdentifiableEntity  implements ExpandableInterface
   public function setCost(float $cost): Payroll
   {
     $this->cost = $cost;
+
+    return $this;
+  }
+
+  /**
+   * @return string
+   */
+  public function getDirection()
+  {
+    return $this->direction;
+  }
+
+  /**
+   * @param string $direction
+   * @return Payroll
+   */
+  public function setDirection(string $direction): Payroll
+  {
+    $this->direction = $direction;
 
     return $this;
   }

@@ -104,6 +104,7 @@ class UserPayrollDatabaseProvider extends AbstractDatabaseProvider implements Ex
         DATE_FORMAT(p.date_entered, "%Y-%m-%dT%H:%i:%sZ") AS "date_created",
         DATE_FORMAT(p.date_modified, "%Y-%m-%dT%H:%i:%sZ") AS "date_updated",
         p.description,
+        p.direction,
         p.cost,
         DATE_FORMAT(p.date_payment, "%Y-%m-%d") AS "date_payment",
         p.employee_id,
