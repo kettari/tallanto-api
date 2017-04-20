@@ -41,6 +41,8 @@ class Factory {
         return new UserDatabaseProvider($connection);
       case 'UserClassAggregator':
         return new UserClassDatabaseProvider($connection);
+      case 'UserPayrollAggregator':
+        return new UserPayrollDatabaseProvider($connection);
       case 'ClassAggregator':
         return new ClassDatabaseProvider($connection);
       case 'SubjectAggregator':

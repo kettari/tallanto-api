@@ -12,9 +12,10 @@ namespace Tallanto\Api\Entity;
 use Tallanto\Api\ExpandableInterface;
 use Tallanto\Api\ExpandableTrait;
 
-class ClassEntity extends AbstractIdentifiableEntity implements ExpandableInterface {
+class ClassEntity extends AbstractIdentifiableEntity implements ExpandableInterface
+{
 
-  use ExpandableTrait, BranchesTrait;
+  use ExpandableTrait, BranchesTrait, AudiencesTrait;
 
   /**
    * @var string
@@ -97,11 +98,6 @@ class ClassEntity extends AbstractIdentifiableEntity implements ExpandableInterf
   protected $parent_id;
 
   /**
-   * @var string
-   */
-  protected $audience;
-
-  /**
    * @var array
    */
   protected $teachers;
@@ -116,11 +112,12 @@ class ClassEntity extends AbstractIdentifiableEntity implements ExpandableInterf
    *
    * @param array $data
    */
-  public function __construct($data) {
+  public function __construct($data)
+  {
     parent::__construct($data);
 
     // Correct boolean to look like boolean
-    $this->calendar_hidden = $this->calendar_hidden ? TRUE : FALSE;
+    $this->calendar_hidden = $this->calendar_hidden ? true : false;
     // Sanitize branch
     $this->branches = $this->sanitizeBranch($this->branches);
     // Sanitize audience
@@ -130,7 +127,7 @@ class ClassEntity extends AbstractIdentifiableEntity implements ExpandableInterf
     if (isset($data['subject']) && !is_null($data['subject'])) {
       $this->subject = new Subject($data['subject']);
       // Expanded variables are provided, set the flag
-      $this->setExpand(TRUE);
+      $this->setExpand(true);
     }
     // Build User objects
     if (isset($data['teachers']) && !is_null($data['teachers'])) {
@@ -141,7 +138,7 @@ class ClassEntity extends AbstractIdentifiableEntity implements ExpandableInterf
       $this->teachers = $teacher_objects;
       //dump($this->teachers);
       // Expanded variables are provided, set the flag
-      $this->setExpand(TRUE);
+      $this->setExpand(true);
     }
   }
 
@@ -150,7 +147,8 @@ class ClassEntity extends AbstractIdentifiableEntity implements ExpandableInterf
    *
    * @return array
    */
-  function toArray() {
+  function toArray()
+  {
     $vars = parent::toArray();
     // Serialize User correctly
     if (is_array($this->teachers)) {
@@ -167,7 +165,8 @@ class ClassEntity extends AbstractIdentifiableEntity implements ExpandableInterf
   /**
    * @return string
    */
-  public function getName() {
+  public function getName()
+  {
     return $this->name;
   }
 
@@ -175,7 +174,8 @@ class ClassEntity extends AbstractIdentifiableEntity implements ExpandableInterf
    * @param string $name
    * @return ClassEntity
    */
-  public function setName($name) {
+  public function setName($name)
+  {
     $this->name = $name;
 
     return $this;
@@ -184,7 +184,8 @@ class ClassEntity extends AbstractIdentifiableEntity implements ExpandableInterf
   /**
    * @return string
    */
-  public function getSubjectId() {
+  public function getSubjectId()
+  {
     return $this->subject_id;
   }
 
@@ -192,7 +193,8 @@ class ClassEntity extends AbstractIdentifiableEntity implements ExpandableInterf
    * @param string $subject_id
    * @return ClassEntity
    */
-  public function setSubjectId($subject_id) {
+  public function setSubjectId($subject_id)
+  {
     $this->subject_id = $subject_id;
 
     return $this;
@@ -201,7 +203,8 @@ class ClassEntity extends AbstractIdentifiableEntity implements ExpandableInterf
   /**
    * @return \Tallanto\Api\Entity\Subject
    */
-  public function getSubject() {
+  public function getSubject()
+  {
     return $this->subject;
   }
 
@@ -209,7 +212,8 @@ class ClassEntity extends AbstractIdentifiableEntity implements ExpandableInterf
    * @param \Tallanto\Api\Entity\Subject $subject
    * @return ClassEntity
    */
-  public function setSubject($subject) {
+  public function setSubject($subject)
+  {
     $this->subject = $subject;
 
     return $this;
@@ -218,7 +222,8 @@ class ClassEntity extends AbstractIdentifiableEntity implements ExpandableInterf
   /**
    * @return string
    */
-  public function getStartDate() {
+  public function getStartDate()
+  {
     return $this->date_start;
   }
 
@@ -226,7 +231,8 @@ class ClassEntity extends AbstractIdentifiableEntity implements ExpandableInterf
    * @param string $date_start
    * @return ClassEntity
    */
-  public function setStartDate($date_start) {
+  public function setStartDate($date_start)
+  {
     $this->date_start = $date_start;
 
     return $this;
@@ -235,7 +241,8 @@ class ClassEntity extends AbstractIdentifiableEntity implements ExpandableInterf
   /**
    * @return string
    */
-  public function getFinishDate() {
+  public function getFinishDate()
+  {
     return $this->date_finish;
   }
 
@@ -243,7 +250,8 @@ class ClassEntity extends AbstractIdentifiableEntity implements ExpandableInterf
    * @param string $date_finish
    * @return ClassEntity
    */
-  public function setFinishDate($date_finish) {
+  public function setFinishDate($date_finish)
+  {
     $this->date_finish = $date_finish;
 
     return $this;
@@ -252,7 +260,8 @@ class ClassEntity extends AbstractIdentifiableEntity implements ExpandableInterf
   /**
    * @return string
    */
-  public function getStatus() {
+  public function getStatus()
+  {
     return $this->status;
   }
 
@@ -260,7 +269,8 @@ class ClassEntity extends AbstractIdentifiableEntity implements ExpandableInterf
    * @param string $status
    * @return ClassEntity
    */
-  public function setStatus($status) {
+  public function setStatus($status)
+  {
     $this->status = $status;
 
     return $this;
@@ -269,7 +279,8 @@ class ClassEntity extends AbstractIdentifiableEntity implements ExpandableInterf
   /**
    * @return float
    */
-  public function getCost() {
+  public function getCost()
+  {
     return $this->cost;
   }
 
@@ -277,7 +288,8 @@ class ClassEntity extends AbstractIdentifiableEntity implements ExpandableInterf
    * @param int $cost
    * @return ClassEntity
    */
-  public function setCost($cost) {
+  public function setCost($cost)
+  {
     $this->cost = $cost;
 
     return $this;
@@ -286,7 +298,8 @@ class ClassEntity extends AbstractIdentifiableEntity implements ExpandableInterf
   /**
    * @return float
    */
-  public function getProfit() {
+  public function getProfit()
+  {
     return $this->profit;
   }
 
@@ -294,7 +307,8 @@ class ClassEntity extends AbstractIdentifiableEntity implements ExpandableInterf
    * @param float $profit
    * @return ClassEntity
    */
-  public function setProfit($profit) {
+  public function setProfit($profit)
+  {
     $this->profit = $profit;
 
     return $this;
@@ -303,7 +317,8 @@ class ClassEntity extends AbstractIdentifiableEntity implements ExpandableInterf
   /**
    * @return int
    */
-  public function getPlacesTotal() {
+  public function getPlacesTotal()
+  {
     return $this->places_total;
   }
 
@@ -311,7 +326,8 @@ class ClassEntity extends AbstractIdentifiableEntity implements ExpandableInterf
    * @param int $places_total
    * @return ClassEntity
    */
-  public function setPlacesTotal($places_total) {
+  public function setPlacesTotal($places_total)
+  {
     $this->places_total = $places_total;
 
     return $this;
@@ -320,7 +336,8 @@ class ClassEntity extends AbstractIdentifiableEntity implements ExpandableInterf
   /**
    * @return int
    */
-  public function getPlacesFree() {
+  public function getPlacesFree()
+  {
     return $this->places_free;
   }
 
@@ -328,7 +345,8 @@ class ClassEntity extends AbstractIdentifiableEntity implements ExpandableInterf
    * @param int $places_free
    * @return ClassEntity
    */
-  public function setPlacesFree($places_free) {
+  public function setPlacesFree($places_free)
+  {
     $this->places_free = $places_free;
 
     return $this;
@@ -337,7 +355,8 @@ class ClassEntity extends AbstractIdentifiableEntity implements ExpandableInterf
   /**
    * @return int
    */
-  public function getApplicantsTotal() {
+  public function getApplicantsTotal()
+  {
     return $this->applicants_total;
   }
 
@@ -345,7 +364,8 @@ class ClassEntity extends AbstractIdentifiableEntity implements ExpandableInterf
    * @param int $applicants_total
    * @return ClassEntity
    */
-  public function setApplicantsTotal($applicants_total) {
+  public function setApplicantsTotal($applicants_total)
+  {
     $this->applicants_total = $applicants_total;
 
     return $this;
@@ -354,7 +374,8 @@ class ClassEntity extends AbstractIdentifiableEntity implements ExpandableInterf
   /**
    * @return int
    */
-  public function getApplicantsVisited() {
+  public function getApplicantsVisited()
+  {
     return $this->applicants_visited;
   }
 
@@ -362,7 +383,8 @@ class ClassEntity extends AbstractIdentifiableEntity implements ExpandableInterf
    * @param int $applicants_visited
    * @return ClassEntity
    */
-  public function setApplicantsVisited($applicants_visited) {
+  public function setApplicantsVisited($applicants_visited)
+  {
     $this->applicants_visited = $applicants_visited;
 
     return $this;
@@ -371,7 +393,8 @@ class ClassEntity extends AbstractIdentifiableEntity implements ExpandableInterf
   /**
    * @return int
    */
-  public function getApplicantsPaid() {
+  public function getApplicantsPaid()
+  {
     return $this->applicants_paid;
   }
 
@@ -379,7 +402,8 @@ class ClassEntity extends AbstractIdentifiableEntity implements ExpandableInterf
    * @param int $applicants_paid
    * @return ClassEntity
    */
-  public function setApplicantsPaid($applicants_paid) {
+  public function setApplicantsPaid($applicants_paid)
+  {
     $this->applicants_paid = $applicants_paid;
 
     return $this;
@@ -388,7 +412,8 @@ class ClassEntity extends AbstractIdentifiableEntity implements ExpandableInterf
   /**
    * @return int
    */
-  public function getApplicantsFree() {
+  public function getApplicantsFree()
+  {
     return $this->applicants_free;
   }
 
@@ -396,7 +421,8 @@ class ClassEntity extends AbstractIdentifiableEntity implements ExpandableInterf
    * @param int $applicants_free
    * @return ClassEntity
    */
-  public function setApplicantsFree($applicants_free) {
+  public function setApplicantsFree($applicants_free)
+  {
     $this->applicants_free = $applicants_free;
 
     return $this;
@@ -405,7 +431,8 @@ class ClassEntity extends AbstractIdentifiableEntity implements ExpandableInterf
   /**
    * @return bool
    */
-  public function isCalendarHidden() {
+  public function isCalendarHidden()
+  {
     return $this->calendar_hidden;
   }
 
@@ -413,7 +440,8 @@ class ClassEntity extends AbstractIdentifiableEntity implements ExpandableInterf
    * @param bool $calendar_hidden
    * @return ClassEntity
    */
-  public function setCalendarHidden($calendar_hidden) {
+  public function setCalendarHidden($calendar_hidden)
+  {
     $this->calendar_hidden = $calendar_hidden;
 
     return $this;
@@ -422,7 +450,8 @@ class ClassEntity extends AbstractIdentifiableEntity implements ExpandableInterf
   /**
    * @return string
    */
-  public function getParentId() {
+  public function getParentId()
+  {
     return $this->parent_id;
   }
 
@@ -430,25 +459,9 @@ class ClassEntity extends AbstractIdentifiableEntity implements ExpandableInterf
    * @param string $parent_id
    * @return ClassEntity
    */
-  public function setParentId($parent_id) {
+  public function setParentId($parent_id)
+  {
     $this->parent_id = $parent_id;
-
-    return $this;
-  }
-
-  /**
-   * @return string
-   */
-  public function getAudience() {
-    return $this->audience;
-  }
-
-  /**
-   * @param string $audience
-   * @return ClassEntity
-   */
-  public function setAudience($audience) {
-    $this->audience = $audience;
 
     return $this;
   }
@@ -456,7 +469,8 @@ class ClassEntity extends AbstractIdentifiableEntity implements ExpandableInterf
   /**
    * @return array
    */
-  public function getTeachers() {
+  public function getTeachers()
+  {
     return $this->teachers;
   }
 
@@ -464,27 +478,11 @@ class ClassEntity extends AbstractIdentifiableEntity implements ExpandableInterf
    * @param array $teachers
    * @return ClassEntity
    */
-  public function setTeachers($teachers) {
+  public function setTeachers($teachers)
+  {
     $this->teachers = $teachers;
 
     return $this;
-  }
-
-  /**
-   * Sanitize audience and return string.
-   *
-   * @param $audience
-   * @return string
-   */
-  private function sanitizeAudience($audience) {
-    $audiences = [];
-    if (preg_match('/\^([a-zA-Z0-9_\-]+)\^/', $audience, $matches)) {
-      for ($i = 1; $i < count($matches); $i++) {
-        $audiences[] = $matches[$i];
-      }
-    }
-
-    return count($audiences) ? reset($audiences) : $audience;
   }
 
   /**

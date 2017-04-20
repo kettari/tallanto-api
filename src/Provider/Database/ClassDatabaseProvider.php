@@ -151,7 +151,7 @@ class ClassDatabaseProvider extends AbstractDatabaseProvider implements Expandab
         mc.parent_id,
         mc.filial AS branches,
         mc.audience,
-        GROUP_CONCAT(mce.employee_id SEPARATOR \',\') AS \'teachers_hash\'';
+        GROUP_CONCAT(mce.employee_id SEPARATOR ",") AS "teachers_hash"';
   }
 
   /**
