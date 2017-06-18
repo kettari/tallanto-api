@@ -78,7 +78,7 @@ interface ProviderInterface {
   /**
    * Sets query (filter).
    *
-   * @param string $query
+   * @param string|null $query
    * @return ProviderInterface
    */
   public function setQuery($query);

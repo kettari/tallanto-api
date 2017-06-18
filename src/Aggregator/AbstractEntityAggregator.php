@@ -12,7 +12,8 @@ namespace Tallanto\Api\Aggregator;
 use Tallanto\Api\Entity\AbstractIdentifiableEntity;
 use Tallanto\Api\Exception\MultipleItemsException;
 
-abstract class AbstractEntityAggregator extends AbstractAggregator implements AggregatorInterface {
+abstract class AbstractEntityAggregator extends AbstractAggregator implements AggregatorInterface
+{
 
   /**
    * Total count of records available from the provider.
@@ -25,35 +26,14 @@ abstract class AbstractEntityAggregator extends AbstractAggregator implements Ag
    * Search entities for the substring. Searches in names, phones and emails.
    * Result is placed to the internal storage and is iteratable.
    *
-   * Loads one page.
-   *
-   * @param string $query
-   * @return bool Returns TRUE if at least one record was found
-   */
-  public function search($query) {
-    // Set query then fetch data from the provider
-    $this->provider->setQuery($query);
-    $result = $this->provider->fetch();
-
-    // Parse result and fill the aggregator with objects
-    $this->parseResult($result);
-    // Store total records count
-    $this->total_count = $this->provider->totalCount();
-
-    return $this->count() > 0;
-  }
-
-  /**
-   * Search entities for the substring. Searches in names, phones and emails.
-   * Result is placed to the internal storage and is iteratable.
-   *
    * Loads all records taking into account pagination.
    *
-   * @param string $query
+   * @param string|null $query
    * @param callable|NULL $callback
    * @return bool Returns TRUE if at least one record was found
    */
-  public function searchEx($query, callable $callback = NULL) {
+  public function searchEx($query = null, callable $callback = null)
+  {
     // Set query then fetch data from the provider
     $this->provider->setQuery($query);
     $result = $this->provider->fetchAll($callback);
@@ -71,7 +51,8 @@ abstract class AbstractEntityAggregator extends AbstractAggregator implements Ag
    *
    * @param array $result
    */
-  protected function parseResult($result) {
+  protected function parseResult($result)
+  {
     // Clear items
     $this->clear();
     // Iterate rows and create objects
@@ -96,18 +77,23 @@ abstract class AbstractEntityAggregator extends AbstractAggregator implements Ag
    * @return null|\Tallanto\Api\Entity\AbstractEntity
    * @throws \Tallanto\Api\Exception\MultipleItemsException
    */
-  public function get($id) {
+  public function get($id)
+  {
     // Search with given ID
     if (!$this->search($id)) {
       $this->total_count = 0;
 
-      return NULL;
+      return null;
     }
 
     // If more than one item was found, throw an exception
     if ($this->count() > 1) {
-      throw new MultipleItemsException(sprintf('Multiple items found for ID "%s"',
-        $id));
+      throw new MultipleItemsException(
+        sprintf(
+          'Multiple items found for ID "%s"',
+          $id
+        )
+      );
     }
 
     // Extract single item
@@ -121,7 +107,30 @@ abstract class AbstractEntityAggregator extends AbstractAggregator implements Ag
       $iterator->next();
     }
 
-    return NULL;
+    return null;
+  }
+
+  /**
+   * Search entities for the substring. Searches in names, phones and emails.
+   * Result is placed to the internal storage and is iteratable.
+   *
+   * Loads one page.
+   *
+   * @param string $query
+   * @return bool Returns TRUE if at least one record was found
+   */
+  public function search($query)
+  {
+    // Set query then fetch data from the provider
+    $this->provider->setQuery($query);
+    $result = $this->provider->fetch();
+
+    // Parse result and fill the aggregator with objects
+    $this->parseResult($result);
+    // Store total records count
+    $this->total_count = $this->provider->totalCount();
+
+    return $this->count() > 0;
   }
 
   /**
@@ -148,7 +157,8 @@ abstract class AbstractEntityAggregator extends AbstractAggregator implements Ag
    *
    * @return int
    */
-  public function totalCount() {
+  public function totalCount()
+  {
     return $this->total_count;
   }
 
