@@ -85,6 +85,40 @@ class ClassDatabaseProvider extends AbstractDatabaseProvider implements Expandab
   }
 
   /**
+   * Returns total number of records that fulfil the criteria.
+   *
+   * @return int
+   */
+  function totalCount()
+  {
+    $sql = $this->getMainSql(
+      'COUNT(DISTINCT mc.id)',
+      $this->getWhereClause(),
+      ''
+    );
+    $stmt = $this->connection->executeQuery(
+      $sql,
+      [
+        'parameter'      => $this->parameter,
+        'query_like'     => '%'.$this->query.'%',
+        'query_exact'    => $this->query,
+        'modified_since' => !is_null(
+          $this->if_modified_since
+        ) ? $this->if_modified_since->format('Y-m-d H:i:s') : 0,
+      ],
+      [
+        PDO::PARAM_STR,
+        PDO::PARAM_STR,
+        PDO::PARAM_STR,
+        PDO::PARAM_STR,
+      ]
+    );
+
+    // Fetch column, it contains records count
+    return $stmt->fetchColumn();
+  }
+
+  /**
    * Gets main SQL.
    *
    * About prepared statements and LIMIT problem
@@ -125,6 +159,94 @@ class ClassDatabaseProvider extends AbstractDatabaseProvider implements Expandab
   }
 
   /**
+   * Prepares WHERE SQL clause
+   *
+   * @return string
+   */
+  protected function getWhereClause()
+  {
+    // Format WHERE clause of the SQL statement
+    $where_clause = '';
+    if (!empty($this->query)) {
+      $where_clause .= ' AND 
+        (mc.id = :query_exact';
+
+      $date_format = false;
+      $range = false;
+      $range_values = [];
+
+      // Select date format to compare date
+      if (preg_match('/^\d{4}-\d{2}-\d{2}$/i', $this->getQuery())) {
+        $date_format = '%Y-%m-%d';
+      } elseif (preg_match(
+        '/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}Z$/i',
+        $this->getQuery()
+      )) {
+        $date_format = '%Y-%m-%dT%H:%iZ';
+      } elseif (preg_match(
+        '/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}Z$/i',
+        $this->getQuery()
+      )) {
+        $date_format = '%Y-%m-%dT%H:%i:%sZ';
+      } elseif (preg_match('/^\d{4}-\d{2}$/i', $this->getQuery())) {
+        $date_format = '%Y-%m';
+      } elseif (preg_match(
+        '/^(\d{4}-\d{2})\|(\d{4}-\d{2})$/i',
+        $this->getQuery(),
+        $matches
+      )) {
+        $date_format = '%Y-%m';
+        $range = true;
+        $range_values['begin'] = $matches[1] ?? '';
+        $range_values['end'] = $matches[2] ?? '';
+      } elseif (preg_match(
+        '/^(\d{4}-\d{2}-\d{2})\|(\d{4}-\d{2}-\d{2})$/i',
+        $this->getQuery(),
+        $matches
+      )) {
+        $date_format = '%Y-%m-%d';
+        $range = true;
+        $range_values['begin'] = $matches[1] ?? '';
+        $range_values['end'] = $matches[2] ?? '';
+      }
+
+      // If query is a date, then look in date fields only
+      if (false !== $date_format) {
+
+        if (!$range) {
+          $where_clause .= sprintf(
+            ' OR DATE_FORMAT(mc.date_start, "%s") = :query_exact',
+            $date_format
+          );
+        } else {
+          $where_clause .= sprintf(
+            ' OR DATE_FORMAT(mc.date_start, "%s") BETWEEN "%s" AND "%s"',
+            $date_format,
+            $range_values['begin'],
+            $range_values['end']
+          );
+        }
+
+      } else {
+
+        if (!$this->isQueryDisableLike()) {
+          $where_clause .= sprintf(
+            ' OR mc.name LIKE :query_like',
+            $date_format
+          );
+        }
+
+      }
+      $where_clause .= ')';
+    }
+    if (!is_null($this->getIfModifiedSince())) {
+      $where_clause .= ' AND mc.date_modified > :modified_since';
+    }
+
+    return $where_clause;
+  }
+
+  /**
    * Prepares SELECT SQL clause.
    *
    * @return string
@@ -152,97 +274,6 @@ class ClassDatabaseProvider extends AbstractDatabaseProvider implements Expandab
         mc.filial AS branches,
         mc.audience,
         GROUP_CONCAT(mce.employee_id SEPARATOR ",") AS "teachers_hash"';
-  }
-
-  /**
-   * Prepares WHERE SQL clause
-   *
-   * @return string
-   */
-  protected function getWhereClause()
-  {
-    // Format WHERE clause of the SQL statement
-    $where_clause = '';
-    if (!empty($this->query)) {
-      $where_clause .= ' AND 
-        (mc.id = :query_exact';
-
-      // Select date format to compare date
-      if (preg_match('/^\d{4}-\d{2}-\d{2}$/i', $this->getQuery())) {
-        $date_format = '%Y-%m-%d';
-      } elseif (preg_match(
-        '/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}Z$/i',
-        $this->getQuery()
-      )) {
-        $date_format = '%Y-%m-%dT%H:%iZ';
-      } elseif (preg_match(
-        '/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}Z$/i',
-        $this->getQuery()
-      )) {
-        $date_format = '%Y-%m-%dT%H:%i:%sZ';
-      } else {
-        $date_format = false;
-      }
-
-      // If query is a date, then look in date fields only
-      if (false !== $date_format) {
-
-        $where_clause .= sprintf(
-          ' OR DATE_FORMAT(mc.date_start, "%s") = :query_exact',
-          $date_format
-        );
-
-      } else {
-
-        if (!$this->isQueryDisableLike()) {
-          $where_clause .= sprintf(
-            ' OR mc.name LIKE :query_like',
-            $date_format
-          );
-        }
-
-      }
-      $where_clause .= ')';
-    }
-    if (!is_null($this->getIfModifiedSince())) {
-      $where_clause .= ' AND mc.date_modified > :modified_since';
-    }
-
-    return $where_clause;
-  }
-
-  /**
-   * Returns total number of records that fulfil the criteria.
-   *
-   * @return int
-   */
-  function totalCount()
-  {
-    $sql = $this->getMainSql(
-      'COUNT(DISTINCT mc.id)',
-      $this->getWhereClause(),
-      ''
-    );
-    $stmt = $this->connection->executeQuery(
-      $sql,
-      [
-        'parameter'      => $this->parameter,
-        'query_like'     => '%'.$this->query.'%',
-        'query_exact'    => $this->query,
-        'modified_since' => !is_null(
-          $this->if_modified_since
-        ) ? $this->if_modified_since->format('Y-m-d H:i:s') : 0,
-      ],
-      [
-        PDO::PARAM_STR,
-        PDO::PARAM_STR,
-        PDO::PARAM_STR,
-        PDO::PARAM_STR,
-      ]
-    );
-
-    // Fetch column, it contains records count
-    return $stmt->fetchColumn();
   }
 
 
