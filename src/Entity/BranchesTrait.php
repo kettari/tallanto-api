@@ -9,7 +9,8 @@
 namespace Tallanto\Api\Entity;
 
 
-trait BranchesTrait {
+trait BranchesTrait
+{
 
   /**
    * @var array
@@ -19,7 +20,8 @@ trait BranchesTrait {
   /**
    * @return array
    */
-  public function getBranches() {
+  public function getBranches()
+  {
     return $this->branches;
   }
 
@@ -27,7 +29,8 @@ trait BranchesTrait {
    * @param array $branches
    * @return mixed
    */
-  public function setBranches($branches) {
+  public function setBranches($branches)
+  {
     $this->branches = $branches;
 
     return $this;
@@ -39,14 +42,17 @@ trait BranchesTrait {
    * @param $branch
    * @return array
    */
-  private function sanitizeBranch($branch) {
+  private function sanitizeBranch($branch)
+  {
     if (is_array($branch)) {
       return $branch;
     }
     $branches = [];
-    if (preg_match('/\^([a-zA-Z0-9_\-]+)\^/', $branch, $matches)) {
-      for ($i = 1; $i < count($matches); $i++) {
-        $branches[] = $matches[$i];
+    if (preg_match_all('/\^([a-z0-9\_\-]+)\^/i', $branch, $matches)) {
+      if (isset($matches[1])) {
+        foreach ($matches[1] as $branch) {
+          $branches[] = $branch;
+        }
       }
     }
 
