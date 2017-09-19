@@ -18,6 +18,8 @@ use Tallanto\Api\Exception\ValidationHttpException;
 
 class TicketIntruder extends AbstractIntruder {
 
+  use DateHelperTrait;
+
   /**
    * Creates new ticket in the Tallanto.
    *
@@ -61,6 +63,18 @@ class TicketIntruder extends AbstractIntruder {
     $data['num_visit'] = $ticket->getNumVisit();
     // num_visit_left
     $data['assigned_user_id'] = $ticket->getManagerId();
+
+    // Crutch for dates
+    $dateStart = $this->parseDate($data['date_start']);
+    $dateFinish = $this->parseDate($data['date_finish']);
+    if ($dateStart instanceof \DateTime) {
+      $data['date_start'] = $dateStart->format('d.m.Y');
+    }
+    if ($dateFinish instanceof \DateTime) {
+      $data['date_finish'] = $dateFinish->format('d.m.Y');
+    }
+    //die(print_r($data, true));
+
     // Convert fields array to form suitable for multipartBuildQuery()
     $multi_data = [];
     foreach ($data as $name => $value) {
