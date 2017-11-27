@@ -132,7 +132,7 @@ class TicketIntruder extends AbstractIntruder {
       'num_visit_type'                   => 'number',
       'num_visit'                        => NULL,
       'cost'                             => NULL,
-      'type'                             => 'Стандартный',
+      'type'                             => 'Standart',
       'group_ticket'                     => '0',
       'form'                             => 'common',
       'class_cost_for_inclusive'         => NULL,
