@@ -88,6 +88,7 @@ class Request {
    * Send HTTP GET request to server and return response
    *
    * @return mixed|null
+   * @throws \Exception
    */
   public function get() {
     return $this->execute('GET');
@@ -100,7 +101,6 @@ class Request {
    * @param array $params
    * @return mixed|null
    * @throws \Exception
-   * @throws \HttpResponseException
    */
   protected function execute($http_method, $params = []) {
     $result = NULL;
@@ -320,6 +320,7 @@ class Request {
    *
    * @param array $params
    * @return mixed|null
+   * @throws \Exception
    */
   public function post($params) {
     return $this->execute('POST', $params);

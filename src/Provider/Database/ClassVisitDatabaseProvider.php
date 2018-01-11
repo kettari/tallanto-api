@@ -22,6 +22,9 @@ class ClassVisitDatabaseProvider extends AnythingVisitDatabaseProvider {
     if (!empty($this->query)) {
       $where_clause .= ' AND mcc.most_class_id = :query_exact';
     }
+    if (!is_null($this->getIfModifiedSince())) {
+      $where_clause .= ' AND mc.date_modified > :modified_since';
+    }
 
     return $where_clause;
   }

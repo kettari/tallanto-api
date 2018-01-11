@@ -23,6 +23,7 @@ abstract class AnythingVisitDatabaseProvider extends AbstractVisitDatabaseProvid
    * Returns array if everything is OK.
    *
    * @return array
+   * @throws \Doctrine\DBAL\DBALException
    */
   function fetch() {
     $visits = parent::fetch();

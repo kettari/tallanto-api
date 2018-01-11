@@ -22,6 +22,7 @@ class TeacherDatabaseProvider extends AbstractDatabaseProvider
    * Returns array if everything is OK.
    *
    * @return array
+   * @throws \Doctrine\DBAL\DBALException
    */
   function fetch()
   {
@@ -122,6 +123,7 @@ class TeacherDatabaseProvider extends AbstractDatabaseProvider
    * Returns total number of records that fulfil the criteria.
    *
    * @return int
+   * @throws \Doctrine\DBAL\DBALException
    */
   function totalCount()
   {

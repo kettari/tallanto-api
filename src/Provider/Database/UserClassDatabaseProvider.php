@@ -58,6 +58,7 @@ class UserClassDatabaseProvider extends ClassDatabaseProvider
    * Returns total number of records that fulfil the criteria.
    *
    * @return int
+   * @throws \Doctrine\DBAL\DBALException
    */
   function totalCount()
   {

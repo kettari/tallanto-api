@@ -39,6 +39,7 @@ abstract class AbstractAggregator extends ArrayObject {
    */
   public function clear() {
     $iterator = $this->getIterator();
+    /** @noinspection PhpStatementHasEmptyBodyInspection */
     for ($iterator->rewind(); $iterator->valid(); $iterator->offsetUnset($iterator->key())) {
     }
   }

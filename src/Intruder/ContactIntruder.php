@@ -28,6 +28,7 @@ class ContactIntruder extends AbstractIntruder {
    * @throws \Tallanto\Api\Exception\InvalidHeaderException
    * @throws \Tallanto\Api\Exception\NotLoggedException
    * @throws \Tallanto\Api\Exception\OperationNotAuthorizedException
+   * @throws \Exception
    */
   public function saveContact(Contact $contact) {
     if (!$this->is_logged) {
@@ -44,6 +45,7 @@ class ContactIntruder extends AbstractIntruder {
    *
    * @param resource $handler
    * @param Contact $contact
+   * @throws \Tallanto\Api\Exception\ValidationHttpException
    */
   protected function setOptContactSave($handler, $contact) {
     // Map data fields

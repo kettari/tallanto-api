@@ -44,6 +44,7 @@ class ServiceProvider extends AbstractProvider implements ProviderInterface, Exp
    * Returns array if everything is OK.
    *
    * @return array
+   * @throws \Exception
    */
   function fetch() {
     $result = $this->request->setParameters([
@@ -78,6 +79,7 @@ class ServiceProvider extends AbstractProvider implements ProviderInterface, Exp
    *
    * @param callable $callback Callback to invoke while fetching data.
    * @return array
+   * @throws \Exception
    */
   public function fetchAll(callable $callback = NULL) {
     $result = [];

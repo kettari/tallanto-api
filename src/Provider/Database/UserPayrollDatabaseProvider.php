@@ -24,6 +24,7 @@ class UserPayrollDatabaseProvider extends AbstractDatabaseProvider implements Ex
    * Returns array if everything is OK.
    *
    * @return array
+   * @throws \Doctrine\DBAL\DBALException
    */
   function fetch()
   {
@@ -174,6 +175,7 @@ class UserPayrollDatabaseProvider extends AbstractDatabaseProvider implements Ex
    * Returns total number of records that fulfil the criteria.
    *
    * @return int
+   * @throws \Doctrine\DBAL\DBALException
    */
   function totalCount()
   {

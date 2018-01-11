@@ -30,6 +30,7 @@ class TicketIntruder extends AbstractIntruder {
    * @throws \Tallanto\Api\Exception\InvalidHeaderException
    * @throws \Tallanto\Api\Exception\NotLoggedException
    * @throws \Tallanto\Api\Exception\OperationNotAuthorizedException
+   * @throws \Exception
    */
   public function saveTicket(Ticket $ticket) {
     if (!$this->is_logged) {
@@ -46,6 +47,7 @@ class TicketIntruder extends AbstractIntruder {
    *
    * @param resource $handler
    * @param Ticket $ticket
+   * @throws \Tallanto\Api\Exception\ValidationHttpException
    */
   protected function setOptTicketSave($handler, $ticket) {
     // Map data fields
