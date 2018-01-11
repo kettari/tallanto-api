@@ -9,7 +9,8 @@
 namespace Tallanto\Api\Entity;
 
 
-class Subject extends AbstractIdentifiableEntity {
+class Subject extends AbstractIdentifiableEntity
+{
 
   use BranchesTrait;
 
@@ -49,17 +50,44 @@ class Subject extends AbstractIdentifiableEntity {
   protected $date_finish;
 
   /**
+   * @var string
+   */
+  protected $type;
+
+  /**
    * Subject constructor.
    *
    * @param array $data
    */
-  public function __construct($data) {
+  public function __construct($data)
+  {
     parent::__construct($data);
 
     // Correct boolean to look like boolean
-    $this->calendar_hidden = $this->calendar_hidden ? TRUE : FALSE;
+    $this->calendar_hidden = $this->calendar_hidden ? true : false;
     // Sanitize branch
     $this->branches = $this->sanitizeBranch($this->branches);
+    // Map subject type
+    $this->type = SubjectMapping::getType($this->getId());
+  }
+
+  /**
+   * @return string
+   */
+  public function getType()
+  {
+    return $this->type;
+  }
+
+  /**
+   * @param string $type
+   * @return Subject
+   */
+  public function setType($type): Subject
+  {
+    $this->type = $type;
+
+    return $this;
   }
 
   /**

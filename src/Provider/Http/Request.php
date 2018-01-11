@@ -100,7 +100,6 @@ class Request {
    * @param array $params
    * @return mixed|null
    * @throws \Exception
-   * @throws \HttpResponseException
    */
   protected function execute($http_method, $params = []) {
     $result = NULL;

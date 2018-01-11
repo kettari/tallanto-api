@@ -108,6 +108,11 @@ class ClassEntity extends AbstractIdentifiableEntity implements ExpandableInterf
   protected $teachers_hash;
 
   /**
+   * @var string
+   */
+  protected $type;
+
+  /**
    * ClassEntity constructor.
    *
    * @param array $data
@@ -140,6 +145,28 @@ class ClassEntity extends AbstractIdentifiableEntity implements ExpandableInterf
       // Expanded variables are provided, set the flag
       $this->setExpand(true);
     }
+
+    // Map subject type
+    $this->type = SubjectMapping::getType($this->getSubjectId());
+  }
+
+  /**
+   * @return string
+   */
+  public function getType()
+  {
+    return $this->type;
+  }
+
+  /**
+   * @param string $type
+   * @return ClassEntity
+   */
+  public function setType($type): ClassEntity
+  {
+    $this->type = $type;
+
+    return $this;
   }
 
   /**
