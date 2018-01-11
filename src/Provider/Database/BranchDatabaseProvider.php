@@ -74,6 +74,7 @@ class BranchDatabaseProvider extends AbstractDatabaseProvider {
    * Returns total number of records that fulfil the criteria.
    *
    * @return int
+   * @throws \Doctrine\DBAL\DBALException
    */
   function totalCount() {
     $sql = $this->getMainSql('COUNT(DISTINCT tl.value)', $this->getWhereClause(),

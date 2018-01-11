@@ -95,6 +95,7 @@ abstract class AbstractIntruder {
    * Authorizes at the Tallanto server.
    *
    * @return AbstractIntruder
+   * @throws \Exception
    */
   public function login() {
     $this->last_cookies = [];
@@ -161,6 +162,7 @@ abstract class AbstractIntruder {
    * Returns TRUE if AbstractIntruder is currently logged in.
    *
    * @return bool
+   * @throws \Exception
    */
   public function isLoggedIn() {
     $this->retrieveResource($this->getUrl());

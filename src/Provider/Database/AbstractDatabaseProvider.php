@@ -50,6 +50,7 @@ abstract class AbstractDatabaseProvider extends AbstractProvider implements Prov
    * Returns array if everything is OK.
    *
    * @return array
+   * @throws \Doctrine\DBAL\DBALException
    */
   function fetch()
   {
@@ -87,7 +88,7 @@ abstract class AbstractDatabaseProvider extends AbstractProvider implements Prov
    * Returns array if everything is OK.
    *
    * @param callable $callback Callback to invoke while fetching data.
-   * @return array
+   * @return array|void
    * @throws \Exception
    */
   public function fetchAll(callable $callback = null)

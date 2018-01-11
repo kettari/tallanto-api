@@ -19,7 +19,8 @@ class SubjectMapping
   const TYPE_MASTERCLASS = 'masterclass';
   const TYPE_OTHER = 'other';
 
-  private static $mapping = [
+  private static /** @noinspection SpellCheckingInspection */
+    $mapping = [
     'eaff779f-0a35-4d72-4969-534659a5f337' => self::TYPE_LEASE,
     //Аренда
     'b24c04e0-e5d8-c4cf-b383-531632555828' => self::TYPE_YOGA_GROUP,

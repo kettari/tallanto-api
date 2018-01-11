@@ -82,6 +82,7 @@ class SubjectDatabaseProvider extends AbstractDatabaseProvider {
    * Returns total number of records that fulfil the criteria.
    *
    * @return int
+   * @throws \Doctrine\DBAL\DBALException
    */
   function totalCount() {
     $sql = $this->getMainSql('COUNT(DISTINCT ms.id)', $this->getWhereClause(),
