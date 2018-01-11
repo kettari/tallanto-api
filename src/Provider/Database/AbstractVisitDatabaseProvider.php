@@ -11,7 +11,37 @@ namespace Tallanto\Api\Provider\Database;
 
 use PDO;
 
-abstract class AbstractVisitDatabaseProvider extends AbstractDatabaseProvider {
+abstract class AbstractVisitDatabaseProvider extends AbstractDatabaseProvider
+{
+
+  /**
+   * Returns total number of records that fulfil the criteria.
+   *
+   * @return int
+   * @throws \Doctrine\DBAL\DBALException
+   */
+  function totalCount()
+  {
+    $sql = $this->getMainSql(
+      'COUNT(DISTINCT mcc.id)',
+      $this->getWhereClause(),
+      ''
+    );
+    $stmt = $this->connection->executeQuery(
+      $sql,
+      [
+        'query_like'     => '%'.$this->query.'%',
+        'query_exact'    => $this->query,
+        'modified_since' => !is_null(
+          $this->if_modified_since
+        ) ? $this->if_modified_since->format('Y-m-d H:i:s') : 0,
+      ],
+      [PDO::PARAM_STR, PDO::PARAM_STR, PDO::PARAM_STR]
+    );
+
+    // Fetch column, it contains records count
+    return $stmt->fetchColumn();
+  }
 
   /**
    * Gets main SQL.
@@ -25,8 +55,10 @@ abstract class AbstractVisitDatabaseProvider extends AbstractDatabaseProvider {
    * @param string $limit_clause
    * @return string
    */
-  protected function getMainSql($select_clause, $where_clause, $limit_clause) {
-    return sprintf('
+  protected function getMainSql($select_clause, $where_clause, $limit_clause)
+  {
+    return sprintf(
+      '
       SELECT
         %s
     
@@ -38,7 +70,11 @@ abstract class AbstractVisitDatabaseProvider extends AbstractDatabaseProvider {
       
       WHERE mcc.deleted = 0%s
       
-      %s', $select_clause, $where_clause, $limit_clause);
+      %s',
+      $select_clause,
+      $where_clause,
+      $limit_clause
+    );
   }
 
   /**
@@ -46,7 +82,8 @@ abstract class AbstractVisitDatabaseProvider extends AbstractDatabaseProvider {
    *
    * @return string
    */
-  protected function getSelectClause() {
+  protected function getSelectClause()
+  {
     return 'mcc.id AS id,
         mcc.most_class_id AS class_id,
         mcc.contact_id AS contact_id,
@@ -57,24 +94,6 @@ abstract class AbstractVisitDatabaseProvider extends AbstractDatabaseProvider {
         DATE_FORMAT(mcc.date_modified, "%Y-%m-%dT%H:%i:%sZ") AS "date_updated",
         mcc.write_yourself AS self_service
       ';
-  }
-
-  /**
-   * Returns total number of records that fulfil the criteria.
-   *
-   * @return int
-   * @throws \Doctrine\DBAL\DBALException
-   */
-  function totalCount() {
-    $sql = $this->getMainSql('COUNT(DISTINCT mcc.id)', $this->getWhereClause(),
-      '');
-    $stmt = $this->connection->executeQuery($sql, [
-      'query_like'  => '%'.$this->query.'%',
-      'query_exact' => $this->query,
-    ], [PDO::PARAM_STR]);
-
-    // Fetch column, it contains records count
-    return $stmt->fetchColumn();
   }
 
 
