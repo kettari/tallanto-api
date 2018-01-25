@@ -240,6 +240,22 @@ class Ticket extends AbstractIdentifiableEntity implements ExpandableInterface {
   }
 
   /**
+   * @return \Tallanto\Api\Entity\Template
+   */
+  public function getTemplate() {
+    return $this->template;
+  }
+
+  /**
+   * @param \Tallanto\Api\Entity\Template $template
+   * @return Ticket
+   */
+  public function setTemplate($template) {
+    $this->template = $template;
+    return $this;
+  }
+
+  /**
    * @return int
    */
   public function getCost() {
