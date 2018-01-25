@@ -89,6 +89,12 @@ class Visit extends AbstractIdentifiableEntity implements ExpandableInterface {
       // Expanded variables are provided, set the flag
       $this->setExpand(TRUE);
     }
+    // Build Ticket objects
+    if (isset($data['ticket']) && !is_null($data['ticket'])) {
+      $this->contact = new Ticket($data['ticket']);
+      // Expanded variables are provided, set the flag
+      $this->setExpand(TRUE);
+    }
     // Build User objects
     if (isset($data['manager']) && !is_null($data['manager'])) {
       $this->manager = new User($data['manager']);
