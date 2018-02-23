@@ -59,6 +59,9 @@ class TicketAggregatorTest extends TestCase {
     $this->assertEquals($expected, $actual, 'Expected 0 items, got: '.$actual);
   }
 
+  /**
+   * @throws \ReflectionException
+   */
   public function testBuildObject() {
     $provider_mock = $this->createMock(ServiceProvider::class);
 
@@ -78,6 +81,7 @@ class TicketAggregatorTest extends TestCase {
    * @see http://stackoverflow.com/questions/249664/best-practices-to-test-protected-methods-with-phpunit
    * @param $name
    * @return \ReflectionMethod
+   * @throws \ReflectionException
    */
   protected static function getMethod($name) {
     $class = new ReflectionClass('Tallanto\Api\Aggregator\TicketAggregator');

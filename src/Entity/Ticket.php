@@ -97,6 +97,21 @@ class Ticket extends AbstractIdentifiableEntity implements ExpandableInterface {
   protected $manager;
 
   /**
+   * @var boolean
+   */
+  protected $freezing;
+
+  /**
+   * @var string
+   */
+  protected $freezing_date;
+
+  /**
+   * @var integer
+   */
+  protected $freezing_count;
+
+  /**
    * Ticket constructor.
    *
    * @param array $data
@@ -106,6 +121,15 @@ class Ticket extends AbstractIdentifiableEntity implements ExpandableInterface {
 
     // Sanitize branch
     $this->branches = $this->sanitizeBranch($this->branches);
+
+    // Freezing
+    if (isset($data['freezing']) && !is_null($data['freezing'])) {
+      if (is_bool($data['freezing'])) {
+        $this->freezing = $data['freezing'];
+      } else {
+        $this->freezing = (0 == $data['freezing']) ? false : true;
+      }
+    }
 
     // Build Template objects
     if (isset($data['template']) && !is_null($data['template'])) {
@@ -380,6 +404,63 @@ class Ticket extends AbstractIdentifiableEntity implements ExpandableInterface {
    */
   public function setManager($manager) {
     $this->manager = $manager;
+    return $this;
+  }
+
+  /**
+   * @return bool
+   */
+  public function isFreezing()
+  {
+    return $this->freezing;
+  }
+
+  /**
+   * @param bool $freezing
+   * @return Ticket
+   */
+  public function setFreezing(bool $freezing): Ticket
+  {
+    $this->freezing = $freezing;
+
+    return $this;
+  }
+
+  /**
+   * @return string
+   */
+  public function getFreezingDate()
+  {
+    return $this->freezing_date;
+  }
+
+  /**
+   * @param string $freezing_date
+   * @return Ticket
+   */
+  public function setFreezingDate(string $freezing_date): Ticket
+  {
+    $this->freezing_date = $freezing_date;
+
+    return $this;
+  }
+
+  /**
+   * @return int
+   */
+  public function getFreezingCount()
+  {
+    return $this->freezing_count;
+  }
+
+  /**
+   * @param int $freezing_count
+   * @return Ticket
+   */
+  public function setFreezingCount(int $freezing_count): Ticket
+  {
+    $this->freezing_count = $freezing_count;
+
     return $this;
   }
 
