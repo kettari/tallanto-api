@@ -162,7 +162,10 @@ class TicketDatabaseProvider extends AbstractDatabaseProvider implements Expanda
         a.num_visit_left,
         a.manual_closed,
         a.assigned_user_id AS manager_id,
-        a.filial AS branches';
+        a.filial AS branches,
+        a.freezing,
+        DATE_FORMAT(a.freezing_date, "%Y-%m-%dT%H:%i:%sZ") AS "freezing_date",
+        a.freezing_count';
   }
 
   /**

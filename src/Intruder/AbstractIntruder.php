@@ -397,7 +397,11 @@ abstract class AbstractIntruder {
    */
   protected function retrieveIdentifier() {
     if ($this->isLastOperationAuthorized()) {
-      if (isset($this->last_headers['Location'])) {
+      if (200 == $this->last_http_code) {
+        // HTTP 200
+        return '';
+      } elseif (isset($this->last_headers['Location'])) {
+        // HTTP 301
         // Check for duplicates
         if (FALSE !==
           strpos($this->last_headers['Location'], 'action=ShowDuplicates')
