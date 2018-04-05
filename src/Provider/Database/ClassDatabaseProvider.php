@@ -64,18 +64,18 @@ class ClassDatabaseProvider extends AbstractDatabaseProvider implements Expandab
           $class['subject_id']
         );
         // Teacher
-        if (is_null($local_copy->getCache('users', $class['teachers_hash'])) &&
+        if (is_null($local_copy->getCache('teachers', $class['teachers_hash'])) &&
           !is_null($class['teachers_hash'])
         ) {
           $teacher_provider->setQuery($class['id']);
           $local_copy->setCache(
-            'users',
+            'teachers',
             $class['teachers_hash'],
             $teacher_provider->fetch()
           );
         }
         $classes[$key_class]['teachers'] = $local_copy->getCache(
-          'users',
+          'teachers',
           $class['teachers_hash']
         );
       }
